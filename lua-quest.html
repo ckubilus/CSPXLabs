@@ -1,0 +1,3613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lua Quest: An Interactive Lua Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b1020; --bg2: #0f1630; --panel: #131c3a; --panel2: #18234a; --line: #263361;
+  --text: #e7ebfa; --muted: #9aa5cc; --moon: #f5d76e; --moon2: #ffe9a3; --blue: #7aa2ff;
+  --ok: #5ad19a; --bad: #ff7b7b; --warn: #ffb35c; --code-bg: #0a0f22;
+  --r: 14px; --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --sans: "IBM Plex Sans", system-ui, sans-serif; --display: "Space Grotesk", var(--sans);
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 80px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans);
+  background-image: radial-gradient(1px 1px at 20% 30%, #ffffff55 50%, transparent 51%), radial-gradient(1px 1px at 70% 60%, #ffffff44 50%, transparent 51%), radial-gradient(1.5px 1.5px at 40% 80%, #ffffff33 50%, transparent 51%), radial-gradient(1px 1px at 85% 15%, #ffffff55 50%, transparent 51%);
+  background-size: 380px 380px, 520px 520px, 640px 640px, 300px 300px; background-attachment: fixed; }
+a { color: var(--blue); }
+code { font-family: var(--mono); font-size: .88em; background: #ffffff10; padding: .1em .35em; border-radius: 5px; color: var(--moon2); }
+kbd { font-family: var(--mono); font-size: .8em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: .05em .4em; background: var(--panel2); }
+h1, h2, h3, h4 { font-family: var(--display); line-height: 1.2; letter-spacing: -.01em; }
+
+/* header */
+header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; padding: 10px 18px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.logo { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.logo span { color: var(--moon); }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 6px 10px; font-size: 18px; cursor: pointer; }
+.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 12px; min-width: 0; }
+#hdr-level { display: flex; align-items: center; gap: 8px; }
+.lv-icon { font-size: 24px; }
+.lv-text { display: flex; flex-direction: column; line-height: 1.15; }
+.lv-text b { font-size: 14px; } .lv-text small { color: var(--muted); font-size: 12px; }
+.xpbar { width: 160px; height: 8px; border-radius: 99px; background: var(--panel2); overflow: hidden; border: 1px solid var(--line); }
+#xpfill { height: 100%; width: 0; background: linear-gradient(90deg, var(--moon), var(--moon2)); transition: width .6s; }
+
+/* layout */
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1280px; margin: 0 auto; }
+#nav { position: sticky; top: 58px; align-self: start; height: calc(100vh - 58px); overflow-y: auto; padding: 16px 10px 40px; border-right: 1px solid var(--line); }
+.nav-sec { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 18px 10px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; color: var(--text); text-decoration: none; font-size: 14.5px; }
+.nav-item:hover { background: var(--panel); }
+.nav-item.cur { background: var(--panel2); box-shadow: inset 3px 0 0 var(--moon); }
+.ni-icon { width: 22px; text-align: center; }
+.ni-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ni-prog { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.ni-prog.done { color: var(--ok); }
+#main { padding: 28px clamp(16px, 4vw, 48px) 80px; min-width: 0; }
+
+/* hero */
+.hero { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; padding: clamp(24px, 5vw, 48px);
+  background: radial-gradient(120% 140% at 100% 0%, #24305f 0%, var(--bg2) 55%); }
+.hero-moon { position: absolute; right: -60px; top: -60px; width: 260px; height: 260px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6cf, var(--moon) 45%, #c9a63d 100%); box-shadow: 0 0 80px #f5d76e55; opacity: .9; }
+.hero-moon::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--bg2); transform: translate(-28%, 12%); opacity: .92; }
+.hero-text { position: relative; max-width: 680px; }
+.hero h1 { font-size: clamp(42px, 7vw, 72px); margin: 6px 0 10px; background: linear-gradient(90deg, var(--moon2), var(--moon)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { color: #cdd4f0; font-size: 17px; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--moon); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 8px; }
+.stat { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+.stat-big { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--moon); min-width: 44px; }
+.stat b { display: block; font-size: 14px; } .stat small { color: var(--muted); font-size: 12px; }
+.sec-title { font-size: 24px; margin: 40px 0 12px; }
+.unit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.unit-card { display: flex; flex-direction: column; text-decoration: none; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; transition: transform .15s, border-color .15s; }
+.unit-card:hover { transform: translateY(-2px); border-color: var(--blue); }
+.unit-card.complete { border-color: #5ad19a66; }
+.unit-card.cap { background: linear-gradient(135deg, #2a2350, var(--panel)); border-color: #f5d76e55; }
+.uc-top { display: flex; align-items: center; gap: 8px; }
+.uc-icon { font-size: 24px; } .uc-num { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+.uc-badge { margin-left: auto; font-size: 20px; }
+.unit-card h3 { margin: 8px 0 4px; font-size: 19px; }
+.unit-card p { margin: 0 0 12px; color: var(--muted); font-size: 14px; flex: 1; }
+.prog { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.prog-bar { flex: 1; height: 6px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.prog-bar div { height: 100%; background: linear-gradient(90deg, var(--blue), var(--ok)); border-radius: 99px; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.badge { text-align: center; padding: 14px 10px; border-radius: var(--r); background: var(--panel); border: 1px dashed var(--line); opacity: .45; filter: grayscale(1); }
+.badge.earned { opacity: 1; filter: none; border-style: solid; border-color: #f5d76e66; background: linear-gradient(180deg, #2a2a4a, var(--panel)); }
+.b-icon { font-size: 30px; } .badge b { display: block; font-size: 14px; margin-top: 4px; } .badge small { color: var(--muted); font-size: 12px; line-height: 1.3; display: block; }
+
+/* units */
+.unit-hero { display: flex; gap: 20px; align-items: center; padding: 22px; border-radius: 20px; border: 1px solid var(--line); background: radial-gradient(120% 140% at 100% 0%, #24305f, var(--bg2) 60%); }
+.uh-icon { font-size: 64px; line-height: 1; }
+.unit-hero h2 { font-size: clamp(28px, 4vw, 40px); margin: 4px 0 6px; }
+.unit-hero p { margin: 0 0 12px; color: #cdd4f0; }
+.subnav { position: sticky; top: 58px; z-index: 10; display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 0; margin: 6px 0 0; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); }
+.subnav button { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; font: 500 14px var(--sans); cursor: pointer; }
+.subnav button:hover { border-color: var(--moon); }
+.lesson h3 { font-size: 22px; margin: 34px 0 8px; color: var(--moon2); }
+.lesson p, .page-head p { color: #d6dcf3; max-width: 78ch; }
+.page-head h2 { font-size: clamp(28px, 4vw, 38px); margin: 6px 0 8px; }
+.muted { color: var(--muted); font-size: 14px; }
+.callout { border-radius: 12px; padding: 12px 16px; margin: 16px 0; border: 1px solid; max-width: 82ch; }
+.callout.tip { background: #7aa2ff14; border-color: #7aa2ff55; }
+.callout.warn { background: #ffb35c14; border-color: #ffb35c66; }
+.callout-label { font-weight: 600; font-family: var(--display); margin-bottom: 4px; }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--line); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--panel2); font-family: var(--display); font-weight: 600; }
+td:first-child { color: var(--muted); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: pre; }
+
+/* code */
+pre.static, .editor { font: 14px/21px var(--mono); }
+pre.static { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; margin: 12px 0; white-space: pre; }
+.runnable { margin: 16px 0 22px; }
+.editor { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px 12px 0 0; overflow: hidden; }
+.editor:focus-within { border-color: var(--blue); }
+.editor pre, .editor textarea { margin: 0; padding: 14px 16px; font: inherit; white-space: pre; tab-size: 2; letter-spacing: 0; word-spacing: 0; }
+.editor pre { position: absolute; inset: 0; overflow: hidden; pointer-events: none; color: var(--text); }
+.editor textarea { position: relative; display: block; width: 100%; min-height: 60px; resize: none; border: 0; outline: none; background: transparent; color: transparent; caret-color: var(--moon); overflow-x: auto; overflow-y: hidden; }
+.editor textarea::selection { background: #7aa2ff55; color: transparent; }
+.tk-c { color: #6f7ba8; font-style: italic; } .tk-s { color: #9fe0a8; } .tk-n { color: #ffb38a; } .tk-k { color: #c9a2ff; font-weight: 600; } .tk-b { color: #7ad3ff; }
+.stdin-wrap { display: block; background: #0d1430; border: 1px solid var(--line); border-top: 0; padding: 8px 12px; }
+.stdin-wrap span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.stdin-wrap code { font-size: 11px; }
+textarea.stdin { width: 100%; background: var(--code-bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: 13px/1.5 var(--mono); resize: vertical; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 12px 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); padding: 8px 14px; border-radius: 10px; font: 600 14px var(--sans); cursor: pointer; text-decoration: none; transition: filter .15s, transform .05s; }
+.btn:hover { filter: brightness(1.15); } .btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+.btn.primary { background: var(--moon); color: #1c1a0b; border-color: var(--moon); }
+.btn.ok { background: #1f5a43; border-color: #2f8a66; color: #d9ffef; }
+.btn.ghost { background: transparent; }
+.btn.danger { background: #6d2230; border-color: #a33a4c; }
+.btn.sm { padding: 5px 10px; font-size: 13px; } .btn.big { padding: 12px 20px; font-size: 16px; } .btn.wide { width: 100%; margin-top: 12px; }
+.out { margin-top: 10px; background: #070b18; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.out-label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.stdout { margin: 4px 0; font: 13.5px/1.5 var(--mono); white-space: pre-wrap; word-break: break-word; color: #e9f0ff; }
+.err { margin: 8px 0 4px; padding: 10px 12px; border-radius: 10px; background: #ff7b7b14; border: 1px solid #ff7b7b55; font: 13.5px/1.5 var(--mono); color: #ffc9c9; white-space: pre-wrap; word-break: break-word; }
+.err-hint { font-family: var(--sans); color: #ffe2b8; margin-top: 6px; font-size: 14px; white-space: normal; }
+.tests { margin-top: 8px; }
+.tests-head { font-weight: 600; font-family: var(--display); margin-bottom: 6px; }
+.tests-head.pass { color: var(--ok); } .tests-head.fail { color: var(--warn); }
+.test { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: 14px; }
+.test > span { width: 18px; font-weight: 700; } .test.pass > span { color: var(--ok); } .test.fail > span { color: var(--bad); }
+.test .detail { color: var(--muted); font: 12.5px/1.4 var(--mono); margin-top: 2px; word-break: break-word; }
+.hints .hint { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: #7aa2ff14; border: 1px solid #7aa2ff44; font-size: 14.5px; }
+.confirm { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: #ffb35c14; border: 1px solid #ffb35c55; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14.5px; }
+.confirm[hidden] { display: none; }
+.solution { margin-top: 10px; }
+.sol-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+
+/* cards */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px clamp(14px, 3vw, 24px); margin: 16px 0; }
+.card-head { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.card-head h4 { margin: 0; font-size: 19px; }
+.status { font-size: 12px; font-family: var(--mono); padding: 3px 9px; border-radius: 99px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.status.done { color: var(--ok); border-color: #5ad19a66; }
+.quiz { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 12px 0; }
+.quiz.done { border-color: #5ad19a55; }
+.q-head { display: flex; gap: 10px; align-items: baseline; }
+.q-num { font-family: var(--display); font-weight: 700; color: var(--moon); }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.opt { text-align: left; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 14px var(--mono); cursor: pointer; }
+.opt:hover:not(:disabled) { border-color: var(--blue); }
+.opt.right { border-color: var(--ok); background: #5ad19a22; color: #d9ffef; }
+.opt.wrong { border-color: var(--bad); background: #ff7b7b18; text-decoration: line-through; opacity: .8; }
+.opt:disabled { cursor: default; }
+.why { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14.5px; }
+.why.right { background: #5ad19a14; border: 1px solid #5ad19a44; } .why.wrong { background: #ff7b7b12; border: 1px solid #ff7b7b44; }
+.reqs-title { font-weight: 600; margin: 12px 0 6px; font-family: var(--display); }
+.reqs { display: grid; gap: 6px; }
+.req { display: flex; gap: 10px; align-items: flex-start; text-align: left; background: var(--bg2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font: 14.5px/1.5 var(--sans); cursor: pointer; }
+.req .box { flex: 0 0 18px; height: 18px; margin-top: 2px; border-radius: 5px; border: 2px solid var(--muted); display: grid; place-items: center; }
+.req.on { border-color: #5ad19a55; } .req.on .box { background: var(--ok); border-color: var(--ok); }
+.req.on .box::after { content: "✓"; color: #062; font-size: 12px; font-weight: 800; }
+.stretch { margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: #f5d76e10; border: 1px solid #f5d76e44; font-size: 14.5px; }
+.stretch ul { margin: 6px 0 0; padding-left: 20px; }
+.pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 40px; flex-wrap: wrap; }
+.report .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.report input { flex: 1; min-width: 180px; background: var(--bg2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 9px 12px; font: 15px var(--sans); }
+#report-box { width: 100%; margin-top: 10px; background: var(--code-bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 13px/1.5 var(--mono); }
+.danger-zone { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.danger-zone span { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.danger-zone span[hidden] { display: none; }
+.gotchas li { margin: 6px 0; }
+.snips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.chip { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; font: 500 14px var(--sans); cursor: pointer; }
+.chip:hover { border-color: var(--moon); }
+.prose h3 { color: var(--moon2); margin-top: 26px; } .prose h3:first-child { margin-top: 4px; }
+.prose li { margin: 6px 0; }
+#lua-warn { margin: 0; padding: 10px 18px; background: #6d2230; color: #ffe0e5; font-size: 14px; text-align: center; }
+
+/* toasts */
+#toasts { position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none; }
+.toast { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 30px #0008; font-size: 14.5px; transform: translateY(20px); opacity: 0; transition: all .3s; max-width: 320px; }
+.toast.show { transform: none; opacity: 1; }
+.toast.xp { border-color: #f5d76e88; } .toast.badge { border-color: var(--ok); background: linear-gradient(135deg, #1f3d38, var(--panel2)); }
+
+/* responsive */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .menu-btn { display: block; }
+  #nav { position: fixed; top: 58px; left: 0; bottom: 0; width: 280px; z-index: 40; background: var(--bg2); transform: translateX(-105%); transition: transform .25s; height: auto; box-shadow: 10px 0 30px #0008; }
+  body.nav-open #nav { transform: none; }
+  .xpbar { display: none; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .uh-icon { font-size: 44px; }
+  .editor, pre.static { font-size: 15px; line-height: 23px; }
+  .editor textarea { font-size: 16px; } /* prevents iOS zoom */
+  .editor pre { font-size: 16px; }
+}
+@media (max-width: 520px) {
+  .lv-text small { display: none; }
+  .unit-hero { flex-direction: column; align-items: flex-start; }
+  .hero-moon { width: 160px; height: 160px; right: -50px; top: -50px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header>
+  <button class="menu-btn" data-act="menu" aria-label="Open menu">☰</button>
+  <a class="logo" href="#home">🌙 Lua <span>Quest</span></a>
+  <div class="hdr-right">
+    <div id="hdr-level"></div>
+    <div class="xpbar" aria-hidden="true"><div id="xpfill"></div></div>
+  </div>
+</header>
+<p id="lua-warn" hidden>⚠️ The Lua interpreter couldn't load (it comes from cdn.jsdelivr.net). Lessons still work, but code won't run. See the Teacher Guide for an offline option.</p>
+<div class="layout">
+  <nav id="nav" aria-label="Course navigation"></nav>
+  <main id="main"></main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+function luaFallback() {
+  var s = document.createElement("script");
+  s.src = "https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js";
+  document.head.appendChild(s);
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js" onerror="luaFallback()"></script>
+<script>
+// ============================================================
+//  LUA QUEST — course content
+//  Teachers: set SHOW_SOLUTIONS to false to hide every sample solution.
+// ============================================================
+const SHOW_SOLUTIONS = true;
+const R = String.raw;
+
+const UNITS = [
+// ------------------------------------------------------------ UNIT 1
+{
+  id: "u1", num: 1, icon: "🌑", title: "Hello, Lua",
+  blurb: "Variables, types and numbers, plus the places your Python and Java habits will trip you up.",
+  badge: { icon: "🌑", name: "First Light" },
+  lesson: [
+    ["h", "Why Lua?"],
+    ["p", `<b>Lua</b> (Portuguese for “moon”) was created in 1993 at PUC-Rio in Brazil. It is tiny, fast, and designed to be <i>embedded</i> inside bigger programs. That's why it shows up in Roblox (a dialect called Luau), World of Warcraft add-ons, the LÖVE game framework, PICO-8, Neovim, Redis and many game engines.`],
+    ["p", `You already know Python, Java and SQL, so this course skips “what is a variable?” and focuses on what is <i>different</i> in Lua. Every dark code box is a live editor. Change it and press <kbd>Run</kbd> (or <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd>).`],
+    ["code", R`
+-- Two dashes start a comment (like # in Python, // in Java)
+--[[ This is a
+     multi-line comment ]]
+
+print("Hello, Lua!")
+
+local name = "Ada"
+local age = 17
+print(name .. " is " .. age .. " years old")   -- .. joins strings
+print(type(name), type(age), type(nil))       -- print puts tabs between values
+`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["Comment", "# note", "// note", "-- note"],
+      ["Variable", "x = 5", "int x = 5;", "local x = 5"],
+      ["Not equal", "a != b", "a != b", "a ~= b"],
+      ["Join strings", "\"a\" + \"b\"", "\"a\" + \"b\"", "\"a\" .. \"b\""],
+      ["Length", "len(s)", "s.length()", "#s"],
+      ["No value", "None", "null", "nil"],
+      ["Increment", "x += 1", "x++", "x = x + 1"],
+    ]}],
+    ["h", "local vs. global"],
+    ["p", `In Lua, a variable is <b>global by default</b>. Writing <code>x = 10</code> creates a global that is visible everywhere, which is a classic source of bugs. Always declare variables with <code>local</code>, which scopes them to the current block (like Java). Semicolons are optional, and there are no type declarations: the <i>value</i> has a type, not the variable.`],
+    ["h", "Only 8 types"],
+    ["p", `<code>nil</code>, <code>boolean</code>, <code>number</code>, <code>string</code>, <code>table</code>, <code>function</code>, <code>userdata</code> and <code>thread</code>. That's all. There is no separate list, dict, set or class type: <b>tables</b> do all of that (Unit 5). Numbers come in two subtypes, integer and float.`],
+    ["code", R`
+print(7 / 2)     -- / always gives a float
+print(10 / 2)    -- still a float!
+print(7 // 2)    -- floor division, like Python
+print(7 % 2)
+print(2 ^ 10)    -- ^ is POWER, not XOR
+print(math.type(3), math.type(3.0))
+print(math.max(4, 9, 2), math.floor(3.7))
+`],
+    ["warn", `<code>^</code> means exponent in Lua. Also, <code>"5" + 3</code> works because strings auto-convert in arithmetic (you get 8, or <code>8.0</code> in Lua 5.3, which this page runs), but <code>"5" == 5</code> is <code>false</code> because <code>==</code> never converts. Prefer explicit <code>tonumber()</code>.`],
+    ["code", R`
+local score
+print(score)        -- nil: declared but never assigned
+print(mystery)      -- nil: never declared... and no error!
+print(type(print))  -- functions are values too
+
+local a, b, c = 1, 2   -- multiple assignment; c gets nil
+print(a, b, c)
+a, b = b, a            -- swap in one line
+print(a, b)
+`],
+    ["tip", "Coming from Python", `Reading an undefined name in Python raises <code>NameError</code>. In Lua it quietly gives <code>nil</code>, so a typo doesn't crash right away; it causes a weird bug later. Spell carefully!`],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`
+local function setup()
+  name = "Ada"     -- no 'local' here!
+end
+setup()
+print(name)`, opts: ["nil", "Ada", "Error", "name"], a: 1,
+      why: "Without <code>local</code>, <code>name</code> becomes a <b>global</b> that is visible everywhere. That's why you should always write <code>local</code>." },
+    { q: "What does this print?", code: R`print(10 .. 20)`, opts: ["30", "1020", "Error", "10 20"], a: 1,
+      why: "<code>..</code> concatenates. Numbers convert to strings automatically. (Keep the spaces, or Lua tries to read <code>10.</code> as a number.)" },
+    { q: "What happens?", code: R`
+local x = 5
+x += 1
+print(x)`, opts: ["6", "5", "Syntax error", "nil"], a: 2,
+      why: "Lua has no <code>+=</code> or <code>++</code>. Write <code>x = x + 1</code>." },
+    { q: "What does this print? (tabs shown as spaces)", code: R`print(type(nil), type(42), type("42"))`,
+      opts: ["nil number string", "nil integer string", "null int String", "Error"], a: 0,
+      why: "<code>type</code> returns a string. Integers and floats are both type <code>number</code>; use <code>math.type</code> to tell them apart." },
+    { q: "What does this print?", code: R`print(#"Lua!")`, opts: ["3", "4", "5", "Error"], a: 1,
+      why: "<code>#</code> is the length operator, and it works on strings and tables." },
+  ],
+  challenges: [
+    { id: "u1-c1", title: "Profile card",
+      task: `Build <code>fullName</code> (<code>"Grace Hopper"</code>), <code>intro</code> (exactly <code>"Hi, I'm Grace Hopper from Lincoln High!"</code>) and <code>nameLength</code>, the number of characters in <code>fullName</code>.`,
+      starter: R`
+local first = "Grace"
+local last = "Hopper"
+local school = "Lincoln High"
+
+-- TODO: build these
+local fullName = ""
+local intro = ""
+local nameLength = 0
+
+print(intro)
+print(nameLength)
+`,
+      tests: R`
+expect("fullName", function() return fullName end, "Grace Hopper")
+expect("intro", function() return intro end, "Hi, I'm Grace Hopper from Lincoln High!")
+expect("nameLength", function() return nameLength end, 12)
+`,
+      hints: ["Join strings with <code>..</code> and don't forget the space: <code>first .. \" \" .. last</code>", "<code>#fullName</code> gives its length."],
+      solution: R`
+local first = "Grace"
+local last = "Hopper"
+local school = "Lincoln High"
+
+local fullName = first .. " " .. last
+local intro = "Hi, I'm " .. fullName .. " from " .. school .. "!"
+local nameLength = #fullName
+
+print(intro)
+print(nameLength)
+` },
+    { id: "u1-c2", title: "Save-file summary",
+      task: `Build <code>summary</code> so it is exactly <code>"Zed | coins: 120 | sword: true"</code>. Careful: <code>..</code> can join numbers but <b>not</b> booleans.`,
+      starter: R`
+local player = "Zed"
+local coins = 120
+local hasSword = true
+
+local summary = ""
+
+print(summary)
+`,
+      tests: R`
+expect("summary", function() return summary end, "Zed | coins: 120 | sword: true")
+`,
+      hints: ["Try joining <code>hasSword</code> directly first and read the error message.", "<code>tostring(hasSword)</code> gives the string <code>\"true\"</code>."],
+      solution: R`
+local player = "Zed"
+local coins = 120
+local hasSword = true
+
+local summary = player .. " | coins: " .. coins .. " | sword: " .. tostring(hasSword)
+
+print(summary)
+` },
+  ],
+  project: {
+    title: "Mad Libs Machine",
+    story: "Build a program that asks for words and prints a silly story with them.",
+    reqs: [
+      "Ask for at least 5 words using <code>io.read()</code> (a name, a number, a noun, a verb, an adjective…)",
+      "Store every answer in a <code>local</code> variable",
+      "Convert the number with <code>tonumber()</code> and do math with it (double it, square it…)",
+      "Print a story of 3+ sentences using <code>..</code>",
+      "Start the file with a multi-line comment explaining the program",
+    ],
+    stdin: "Ada\n7\nwaffle\ndance\npurple",
+    starter: R`
+--[[
+  Mad Libs Machine
+  Author: <your name>
+]]
+
+io.write("Enter a name: ")
+local name = io.read()
+
+io.write("Enter a number: ")
+local num = tonumber(io.read())
+
+-- TODO: ask for at least 3 more words
+
+print()
+print("Once upon a time, " .. name .. " found " .. num .. " ...")
+-- TODO: finish the story (use num * 2 somewhere!)
+`,
+    hints: ["In this page, the <b>Input</b> box feeds <code>io.read()</code>: one line per call.", "<code>io.write</code> prints without a newline, which is handy for prompts."],
+    stretch: ["SHOUT one word with <code>string.upper(word)</code>", "If <code>num</code> is <code>nil</code> (the user typed letters), print a friendly message instead of crashing"],
+    solution: R`
+--[[
+  Mad Libs Machine
+  Asks for five words and builds a story.
+]]
+io.write("Enter a name: ")
+local name = io.read()
+io.write("Enter a number: ")
+local num = tonumber(io.read())
+io.write("Enter a food: ")
+local food = io.read()
+io.write("Enter a verb: ")
+local verb = io.read()
+io.write("Enter a color: ")
+local color = io.read()
+
+print()
+print("Once upon a time, " .. name .. " found " .. num .. " " .. color .. " " .. food .. "s.")
+print("Being very hungry, " .. name .. " decided to " .. verb .. " until they doubled to " .. num * 2 .. ".")
+print("To this day, people still " .. string.upper(verb) .. " in " .. name .. "'s honor.")
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 2
+{
+  id: "u2", num: 2, icon: "🌒", title: "Decisions & Truth",
+  blurb: "if/elseif, and/or tricks, and the truthiness rule that surprises everyone.",
+  badge: { icon: "⚖️", name: "Truth Seeker" },
+  lesson: [
+    ["h", "if / elseif / else"],
+    ["code", R`
+local score = 87
+
+if score >= 90 then
+  print("A")
+elseif score >= 80 then
+  print("B")
+else
+  print("Keep going")
+end
+`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["Else-if", "elif x:", "else if (x) {", "elseif x then"],
+      ["Logic", "and  or  not", "&&  ||  !", "and  or  not"],
+      ["Blocks", "indentation", "{ ... }", "then ... end"],
+      ["Switch", "match", "switch", "(none: use if chains or tables)"],
+    ]}],
+    ["h", "Truthiness: the #1 surprise"],
+    ["p", `In Lua, <b>only <code>false</code> and <code>nil</code> are falsy</b>. Everything else is truthy, including <code>0</code>, <code>""</code> and empty tables. In Python, <code>0</code>, <code>""</code> and <code>[]</code> are all falsy.`],
+    ["code", R`
+if 0 then print("0 is truthy!") end
+if "" then print("the empty string is truthy!") end
+if {} then print("an empty table is truthy!") end
+if not nil then print("nil is falsy") end
+`],
+    ["h", "and / or return values"],
+    ["p", `<code>and</code>/<code>or</code> don't return true/false; they return one of their operands. <code>a or b</code> gives <code>a</code> if it's truthy, otherwise <code>b</code>. <code>a and b</code> gives <code>a</code> if it's falsy, otherwise <code>b</code>. That gives two everyday idioms: <b>defaults</b> (<code>x = x or 10</code>) and the <b>ternary</b> (<code>cond and A or B</code>).`],
+    ["code", R`
+print(nil or "default")
+print(false and "never")
+print(5 and 10)
+
+local age = 17
+local status = age >= 18 and "adult" or "minor"
+print(status)
+`],
+    ["warn", `The ternary idiom breaks when the middle value is <code>false</code> or <code>nil</code>: <code>cond and nil or "x"</code> always gives <code>"x"</code>.`],
+    ["p", `Comparisons: <code>==  ~=  &lt;  &gt;  &lt;=  &gt;=</code>. Strings compare alphabetically (<code>"apple" &lt; "banana"</code>). <code>==</code> never converts types, so <code>"10" == 10</code> is <code>false</code>. Convert with <code>tonumber</code>/<code>tostring</code>.`],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`if 0 then print("yes") else print("no") end`, opts: ["yes", "no", "Error", "nothing"], a: 0,
+      why: "Only <code>nil</code> and <code>false</code> are falsy. <code>0</code> is truthy." },
+    { q: "What does this print?", code: R`print(nil == false)`, opts: ["true", "false", "nil", "Error"], a: 1,
+      why: "Both are falsy, but they are different values of different types." },
+    { q: "What does this print?", code: R`print(nil or false or "x")`, opts: ["nil", "false", "x", "true"], a: 2,
+      why: "<code>or</code> returns the first truthy operand, or the last one if none are truthy." },
+    { q: "What does this print?", code: R`print("10" == 10)`, opts: ["true", "false", "Error", "nil"], a: 1,
+      why: "<code>==</code> never converts types. (Arithmetic does: <code>\"10\" + 0</code> gives a number.)" },
+    { q: "What does this print?", code: R`
+local x = 5
+print(x > 3 and "big" or "small")`, opts: ["true", "big", "small", "5"], a: 1,
+      why: "<code>x > 3</code> is true, so <code>and</code> gives <code>\"big\"</code>, which is truthy, so <code>or</code> keeps it." },
+  ],
+  challenges: [
+    { id: "u2-c1", title: "Letter grade",
+      task: `Write <code>letterGrade(score)</code>: 90+ → <code>"A"</code>, 80+ → <code>"B"</code>, 70+ → <code>"C"</code>, 60+ → <code>"D"</code>, otherwise <code>"F"</code>. Return <code>"invalid"</code> if the score is below 0 or above 100.`,
+      starter: R`
+local function letterGrade(score)
+  -- your code here
+end
+
+print(letterGrade(95))
+`,
+      tests: R`
+expect("letterGrade(95)", function() return letterGrade(95) end, "A")
+expect("letterGrade(90)", function() return letterGrade(90) end, "A")
+expect("letterGrade(89.5)", function() return letterGrade(89.5) end, "B")
+expect("letterGrade(72)", function() return letterGrade(72) end, "C")
+expect("letterGrade(65)", function() return letterGrade(65) end, "D")
+expect("letterGrade(0)", function() return letterGrade(0) end, "F")
+expect("letterGrade(100)", function() return letterGrade(100) end, "A")
+expect("letterGrade(-5)", function() return letterGrade(-5) end, "invalid")
+expect("letterGrade(101)", function() return letterGrade(101) end, "invalid")
+`,
+      hints: ["Check the invalid case first: <code>if score &lt; 0 or score &gt; 100 then return \"invalid\" end</code>", "Then go from the top down with <code>elseif</code>."],
+      solution: R`
+local function letterGrade(score)
+  if score < 0 or score > 100 then
+    return "invalid"
+  elseif score >= 90 then
+    return "A"
+  elseif score >= 80 then
+    return "B"
+  elseif score >= 70 then
+    return "C"
+  elseif score >= 60 then
+    return "D"
+  else
+    return "F"
+  end
+end
+
+print(letterGrade(95))
+` },
+    { id: "u2-c2", title: "Access control",
+      task: `Write <code>canEnter(role, isBanned)</code>, which returns <code>true</code>/<code>false</code>. Banned users never get in. Otherwise, <code>"admin"</code> and <code>"member"</code> get in, and anyone else (including a missing role) doesn't.`,
+      starter: R`
+local function canEnter(role, isBanned)
+  -- your code here
+end
+
+print(canEnter("member"))
+`,
+      tests: R`
+expect('canEnter("admin")', function() return canEnter("admin") end, true)
+expect('canEnter("member")', function() return canEnter("member") end, true)
+expect('canEnter("guest")', function() return canEnter("guest") end, false)
+expect("canEnter(nil)", function() return canEnter(nil) end, false)
+expect('canEnter("member", true)', function() return canEnter("member", true) end, false)
+expect('canEnter("admin", true)', function() return canEnter("admin", true) end, false)
+`,
+      hints: ["Handle the banned case first, then return <code>role == \"admin\" or role == \"member\"</code>.", "Make sure you return a real <code>false</code>, not <code>nil</code>."],
+      solution: R`
+local function canEnter(role, isBanned)
+  if isBanned then return false end
+  return role == "admin" or role == "member"
+end
+
+print(canEnter("member"))
+` },
+    { id: "u2-c3", title: "Movie tickets",
+      task: `Write <code>ticketPrice(age, isStudent)</code>. A negative age returns <code>nil</code>. Ages 12 and under pay 6. Ages 65+ pay 7 (even if they are students). Students pay 9. Everyone else pays 12. <code>isStudent</code> may be left out entirely.`,
+      starter: R`
+local function ticketPrice(age, isStudent)
+  -- your code here
+end
+
+print(ticketPrice(30), ticketPrice(30, true))
+`,
+      tests: R`
+expect("ticketPrice(8)", function() return ticketPrice(8) end, 6)
+expect("ticketPrice(8, true)", function() return ticketPrice(8, true) end, 6)
+expect("ticketPrice(30)", function() return ticketPrice(30) end, 12)
+expect("ticketPrice(30, true)", function() return ticketPrice(30, true) end, 9)
+expect("ticketPrice(70, true)", function() return ticketPrice(70, true) end, 7)
+expect("ticketPrice(-1)", function() return ticketPrice(-1) end, nil)
+`,
+      hints: ["A missing argument is just <code>nil</code>, and <code>nil</code> is falsy, so <code>if isStudent then</code> works fine.", "Order matters: check the age groups before checking the student discount."],
+      solution: R`
+local function ticketPrice(age, isStudent)
+  if age < 0 then return nil end
+  if age <= 12 then return 6 end
+  if age >= 65 then return 7 end
+  if isStudent then return 9 end
+  return 12
+end
+
+print(ticketPrice(30), ticketPrice(30, true))
+` },
+  ],
+  project: {
+    title: "Rock, Paper, Scissors Referee",
+    story: "Two players type their moves. Your program decides who wins. No tables yet, just if/elseif and logic.",
+    reqs: [
+      "Read two moves from input (player 1, then player 2)",
+      "Accept any capitalization (<code>string.lower(move)</code> helps)",
+      "Print <code>Player 1 wins</code>, <code>Player 2 wins</code>, or <code>Tie</code>",
+      "Print <code>Invalid move</code> if either move isn't rock/paper/scissors",
+      "Use <code>and</code>/<code>or</code> to keep the win check short",
+    ],
+    stdin: "rock\nScissors",
+    starter: R`
+local p1 = string.lower(io.read() or "")
+local p2 = string.lower(io.read() or "")
+
+local function valid(m)
+  -- return true if m is "rock", "paper" or "scissors"
+end
+
+-- TODO: decide the winner
+`,
+    hints: ["Player 1 wins if <code>(p1 == \"rock\" and p2 == \"scissors\") or (...) or (...)</code>.", "<code>io.read() or \"\"</code> avoids crashing when the input runs out."],
+    stretch: ["Play best-of-3 with a loop (peek ahead to Unit 3!)", "Add lizard and spock"],
+    solution: R`
+local p1 = string.lower(io.read() or "")
+local p2 = string.lower(io.read() or "")
+
+local function valid(m)
+  return m == "rock" or m == "paper" or m == "scissors"
+end
+
+if not valid(p1) or not valid(p2) then
+  print("Invalid move")
+elseif p1 == p2 then
+  print("Tie")
+elseif (p1 == "rock" and p2 == "scissors")
+    or (p1 == "paper" and p2 == "rock")
+    or (p1 == "scissors" and p2 == "paper") then
+  print("Player 1 wins")
+else
+  print("Player 2 wins")
+end
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 3
+{
+  id: "u3", num: 3, icon: "🌓", title: "Loops",
+  blurb: "for, while and repeat-until. Ranges include the end value, and there's no continue.",
+  badge: { icon: "🔁", name: "Loop de Loop" },
+  lesson: [
+    ["h", "The numeric for"],
+    ["code", R`
+for i = 1, 5 do
+  io.write(i, " ")
+end
+print()
+
+for i = 10, 1, -3 do     -- start, stop, step
+  io.write(i, " ")
+end
+print()
+`],
+    ["table", { head: ["Python", "Java", "Lua"], code: [0,1,2], rows: [
+      ["for i in range(1, 6):", "for (int i = 1; i <= 5; i++)", "for i = 1, 5 do ... end"],
+      ["for i in range(10, 0, -3):", "for (int i = 10; i >= 1; i -= 3)", "for i = 10, 1, -3 do ... end"],
+    ]}],
+    ["warn", `The stop value is <b>included</b>. <code>for i = 1, 5</code> runs 5 times, while Python's <code>range(1, 5)</code> runs only 4.`],
+    ["h", "while and repeat … until"],
+    ["code", R`
+local n = 1
+while n < 100 do
+  n = n * 2
+end
+print(n)
+
+local tries = 0
+repeat
+  tries = tries + 1
+until tries >= 3
+print("tries:", tries)
+`],
+    ["p", `<code>repeat … until</code> is like Java's <code>do … while</code>: the body runs at least once. But it loops <i>until</i> the condition becomes true, which is the opposite sense. Locals declared inside the body can be used in the <code>until</code> condition.`],
+    ["h", "break, but no continue"],
+    ["code", R`
+for i = 1, 10 do
+  if i > 6 then break end
+  if i % 2 == 0 then goto continue end   -- skip even numbers
+  print(i)
+  ::continue::
+end
+`],
+    ["tip", "Good to know", `The loop variable is automatically <code>local</code> to the loop, so after the loop it's gone. Never assign to it inside the loop. There's also a <i>generic</i> for (<code>for k, v in pairs(t)</code>), which you'll meet with tables in Unit 5.`],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`for i = 1, 3 do io.write(i) end`, opts: ["12", "123", "0123", "1 2 3"], a: 1,
+      why: "The end value is included, and <code>io.write</code> adds no spaces or newlines." },
+    { q: "What does this print?", code: R`for i = 3, 1 do print(i) end`, opts: ["3 2 1", "3", "nothing", "Error"], a: 2,
+      why: "The default step is +1, so a loop from 3 up to 1 never runs. Use <code>for i = 3, 1, -1</code>." },
+    { q: "What does this print?", code: R`for i = 1, 3 do io.write("go") end`, opts: ["go", "gogo", "gogogo", "go go go"], a: 2,
+      why: "The loop body runs for i = 1, 2 and 3, and <code>io.write</code> adds no spaces." },
+    { q: "What does this print?", code: R`
+for i = 1, 3 do end
+print(i)`, opts: ["3", "4", "nil", "Error"], a: 2,
+      why: "The loop variable is local to the loop. Outside it, <code>i</code> is an undefined global, which is <code>nil</code>." },
+    { q: "What does this print?", code: R`
+local word = ""
+repeat
+  word = word .. "ha"
+until #word >= 6
+print(word)`, opts: ["haha", "hahaha", "hahahaha", "ha"], a: 1,
+      why: "The body always runs at least once, and the loop stops as soon as the string reaches 6 characters." },
+  ],
+  challenges: [
+    { id: "u3-c1", title: "Launch countdown",
+      task: `Write <code>countdown(n)</code>, which <b>returns</b> a string counting down from n, then <code>Liftoff!</code>. <code>countdown(3)</code> → <code>"3 2 1 Liftoff!"</code>, and <code>countdown(0)</code> → <code>"Liftoff!"</code>.`,
+      starter: R`
+local function countdown(n)
+  local result = ""
+  -- your loop here
+  return result
+end
+
+print(countdown(5))
+`,
+      tests: R`
+expect("countdown(3)", function() return countdown(3) end, "3 2 1 Liftoff!")
+expect("countdown(1)", function() return countdown(1) end, "1 Liftoff!")
+expect("countdown(0)", function() return countdown(0) end, "Liftoff!")
+`,
+      hints: ["Count backwards with a step of -1: <code>for i = n, 1, -1 do</code>", "Add <code>i .. \" \"</code> each time, then <code>\"Liftoff!\"</code> after the loop."],
+      solution: R`
+local function countdown(n)
+  local result = ""
+  for i = n, 1, -1 do
+    result = result .. i .. " "
+  end
+  return result .. "Liftoff!"
+end
+
+print(countdown(5))
+` },
+    { id: "u3-c2", title: "Staircase",
+      task: `Write <code>staircase(n)</code>, which returns n lines joined by <code>"\\n"</code> (no newline at the end), where line i has i <code>#</code> characters. <code>print(staircase(3))</code> shows a 3-step staircase.`,
+      starter: R`
+local function staircase(n)
+  local result = ""
+  -- your loop here
+  return result
+end
+
+print(staircase(4))
+`,
+      tests: R`
+expect("staircase(1)", function() return staircase(1) end, "#")
+expect("staircase(3)", function() return staircase(3) end, "#\n##\n###")
+expect("staircase(0)", function() return staircase(0) end, "")
+`,
+      hints: ["<code>string.rep(\"#\", i)</code> makes a row of i hashes.", "Add the <code>\"\\n\"</code> only <i>between</i> rows: <code>if i > 1 then ... end</code>"],
+      solution: R`
+local function staircase(n)
+  local result = ""
+  for i = 1, n do
+    if i > 1 then result = result .. "\n" end
+    result = result .. string.rep("#", i)
+  end
+  return result
+end
+
+print(staircase(4))
+` },
+    { id: "u3-c3", title: "First vowel",
+      task: `Write <code>firstVowel(word)</code> with a <code>while</code> loop. Return the position of the first lowercase vowel (a, e, i, o, u), or <code>nil</code> if there isn't one. <code>word:sub(i, i)</code> gives the character at position i.`,
+      starter: R`
+local function firstVowel(word)
+  local i = 1
+  -- your loop here
+end
+
+print(firstVowel("strong"))
+`,
+      tests: R`
+expect('firstVowel("apple")', function() return firstVowel("apple") end, 1)
+expect('firstVowel("strong")', function() return firstVowel("strong") end, 4)
+expect('firstVowel("rhythm")', function() return firstVowel("rhythm") end, nil)
+`,
+      hints: ["<code>while i &lt;= #word do ... i = i + 1 end</code>", "Return from inside the loop as soon as you find a vowel. If the loop finishes, return <code>nil</code>."],
+      solution: R`
+local function firstVowel(word)
+  local i = 1
+  while i <= #word do
+    local ch = word:sub(i, i)
+    if ch == "a" or ch == "e" or ch == "i" or ch == "o" or ch == "u" then
+      return i
+    end
+    i = i + 1
+  end
+  return nil
+end
+
+print(firstVowel("strong"))
+` },
+  ],
+  project: {
+    title: "Guess My Number",
+    story: "The classic. The computer picks a secret number and the player keeps guessing until they get it.",
+    reqs: [
+      "Pick a secret with <code>math.random(1, 100)</code>",
+      "Loop reading guesses until the guess is correct",
+      "Print <code>Too high</code> / <code>Too low</code>",
+      "Count the attempts and print the total at the end",
+      "Don't crash on non-number input (<code>tonumber</code> returns <code>nil</code>)",
+      "Stop cleanly if input runs out (<code>io.read()</code> returns <code>nil</code>)",
+    ],
+    stdin: "50\n25\n75\nabc\n60",
+    starter: R`
+math.randomseed(os.time())
+local secret = math.random(1, 100)
+-- local secret = 60   -- uncomment while testing!
+local attempts = 0
+
+print("I'm thinking of a number between 1 and 100...")
+
+-- TODO: loop until the guess is correct
+--   local line = io.read()
+--   if line == nil then ... end   (no more input)
+`,
+    hints: ["<code>while true do ... break ... end</code> is a perfectly good game loop.", "Put your guesses in the Input box, one per line."],
+    stretch: ["Add difficulty levels (1–10, 1–100, 1–1000)", "Write a bot that guesses by binary search, and show it never needs more than 7 guesses for 1–100"],
+    solution: R`
+math.randomseed(os.time())
+local secret = math.random(1, 100)
+local attempts = 0
+
+print("I'm thinking of a number between 1 and 100...")
+while true do
+  io.write("Your guess: ")
+  local line = io.read()
+  if line == nil then
+    print("\nOut of input! The number was " .. secret)
+    break
+  end
+  local guess = tonumber(line)
+  if guess == nil then
+    print("That's not a number!")
+  else
+    attempts = attempts + 1
+    if guess < secret then
+      print("Too low")
+    elseif guess > secret then
+      print("Too high")
+    else
+      print("Correct! You got it in " .. attempts .. " attempts.")
+      break
+    end
+  end
+end
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 4
+{
+  id: "u4", num: 4, icon: "🌔", title: "Functions",
+  blurb: "Multiple return values, varargs, first-class functions and closures.",
+  badge: { icon: "λ", name: "Function Junction" },
+  lesson: [
+    ["h", "Defining functions"],
+    ["code", R`
+local function area(w, h)
+  return w * h
+end
+print(area(3, 4))
+
+-- missing arguments become nil; extra ones are ignored
+local function greet(name, greeting)
+  greeting = greeting or "Hello"      -- default value idiom
+  return greeting .. ", " .. name .. "!"
+end
+print(greet("Sam"))
+print(greet("Sam", "Yo", "ignored"))
+`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["Define", "def f(a, b=2):", "static int f(int a, int b) {", "local function f(a, b) ... end"],
+      ["Return many", "return a, b  (a tuple)", "return new int[]{a, b};", "return a, b  (really two values)"],
+      ["Lambda", "lambda x: x * 2", "x -> x * 2", "function(x) return x * 2 end"],
+    ]}],
+    ["h", "Multiple return values"],
+    ["code", R`
+local function minMax(a, b, c)
+  return math.min(a, b, c), math.max(a, b, c)
+end
+
+local lo, hi = minMax(4, 9, 1)
+print(lo, hi)
+print(minMax(4, 9, 1))         -- all values pass through
+print((minMax(4, 9, 1)))       -- extra parentheses keep only the first
+print(minMax(4, 9, 1), "end")  -- not last in the list: only the first value
+`],
+    ["h", "Variadic functions"],
+    ["code", R`
+local function sum(...)
+  local total = 0
+  for i = 1, select("#", ...) do     -- select("#", ...) = number of args
+    total = total + select(i, ...)   -- select(i, ...) = the i-th arg onward
+  end
+  return total
+end
+print(sum(1, 2, 3, 4))
+print(sum())
+`],
+    ["h", "Functions are values, and closures remember"],
+    ["code", R`
+local function makeCounter()
+  local count = 0
+  return function()
+    count = count + 1
+    return count
+  end
+end
+
+local c1 = makeCounter()
+local c2 = makeCounter()
+print(c1(), c1(), c1())
+print(c2())
+
+local function apply(f, x) return f(x) end
+print(apply(function(n) return n * n end, 7))
+`],
+    ["tip", "Coming from Java", `Lua functions are like Java lambdas, except they can be stored anywhere and they can <i>modify</i> the variables they capture. (Java lambdas can only read effectively-final locals.)`],
+    ["p", `A <code>local function</code> must be defined above the line that calls it. When the only argument is a string or table literal, you can skip the parentheses: <code>print "hi"</code>.`],
+  ],
+  quiz: [
+    { q: "Given <code>local function f() return 1, 2, 3 end</code>, what does this print?", code: R`print(f())`, opts: ["1", "1 2 3", "{1, 2, 3}", "3"], a: 1,
+      why: "When a call is the last expression in a list, all of its return values pass through." },
+    { q: "Same <code>f</code>. What does this print?", code: R`print((f()))`, opts: ["1", "1 2 3", "3", "Error"], a: 0,
+      why: "Wrapping a call in parentheses trims it to exactly one value." },
+    { q: "Same <code>f</code>. What does this print?", code: R`print(f(), 10)`, opts: ["1 2 3 10", "1 10", "10", "3 10"], a: 1,
+      why: "A call that isn't last in a list is cut to its first value." },
+    { q: "What does this print?", code: R`
+local function g(a, b) return b end
+print(g(1))`, opts: ["1", "nil", "0", "Error"], a: 1,
+      why: "Missing arguments are simply <code>nil</code>, with no error." },
+    { q: "What does this print?", code: R`
+local function make()
+  local s = ""
+  return function() s = s .. "*"; return s end
+end
+local a, b = make(), make()
+a(); a()
+print(a(), b())`, opts: ["* *", "*** *", "*** ***", "** *"], a: 1,
+      why: "Each call to <code>make</code> creates a fresh <code>s</code>. <code>a</code> has been called 3 times; <code>b</code> once." },
+  ],
+  challenges: [
+    { id: "u4-c1", title: "Join with varargs",
+      task: `Write <code>joinWords(sep, ...)</code>, which joins any number of words with <code>sep</code> between them. <code>joinWords(", ", "red", "green", "blue")</code> → <code>"red, green, blue"</code>. With no words, return <code>""</code>.`,
+      starter: R`
+local function joinWords(sep, ...)
+  -- your code here
+end
+
+print(joinWords(" / ", "Lua", "Python", "Java"))
+`,
+      tests: R`
+expect('joinWords(", ", "red", "green", "blue")', function() return joinWords(", ", "red", "green", "blue") end, "red, green, blue")
+expect('joinWords(" ", "solo")', function() return joinWords(" ", "solo") end, "solo")
+expect('joinWords("-")', function() return joinWords("-") end, "")
+`,
+      hints: ["<code>select(\"#\", ...)</code> tells you how many words there are, and <code>(select(i, ...))</code> gets word i.", "Only add <code>sep</code> before words after the first."],
+      solution: R`
+local function joinWords(sep, ...)
+  local result = ""
+  for i = 1, select("#", ...) do
+    if i > 1 then result = result .. sep end
+    result = result .. (select(i, ...))
+  end
+  return result
+end
+
+print(joinWords(" / ", "Lua", "Python", "Java"))
+` },
+    { id: "u4-c2", title: "Function factories",
+      task: `Write <code>makeGreeter(greeting)</code>, which returns a function that takes a name: <code>makeGreeter("Hello")("Ada")</code> → <code>"Hello, Ada!"</code>. Also write <code>compose(f, g)</code>, which returns a function computing <code>f(g(x))</code>.`,
+      starter: R`
+local function makeGreeter(greeting)
+end
+
+local function compose(f, g)
+end
+
+local hey = makeGreeter("Hey")
+print(hey("Sam"))
+`,
+      tests: R`
+expect('makeGreeter("Hello")("Ada")', function() return makeGreeter("Hello")("Ada") end, "Hello, Ada!")
+expect('compose(string.upper, makeGreeter("hi"))("bob")', function() return compose(string.upper, makeGreeter("hi"))("bob") end, "HI, BOB!")
+expect("compose(addQuestion, string.lower)", function()
+  local addQuestion = function(s) return s .. "?" end
+  return compose(addQuestion, string.lower)("WHO")
+end, "who?")
+`,
+      hints: ["The body of <code>makeGreeter</code> is one line: <code>return function(name) ... end</code>"],
+      solution: R`
+local function makeGreeter(greeting)
+  return function(name) return greeting .. ", " .. name .. "!" end
+end
+
+local function compose(f, g)
+  return function(x) return f(g(x)) end
+end
+
+local hey = makeGreeter("Hey")
+print(hey("Sam"))
+` },
+    { id: "u4-c3", title: "Counter with reset",
+      task: `Write <code>makeCounter(step)</code>, which returns <b>two functions</b>: <code>inc()</code> adds <code>step</code> and returns the new value, and <code>reset()</code> sets it back to 0. Both must share the same hidden count.`,
+      starter: R`
+local function makeCounter(step)
+end
+
+local inc, reset = makeCounter(5)
+print(inc(), inc())
+`,
+      tests: R`
+check("inc, inc gives 5 then 10", function() local inc = makeCounter(5); return inc() == 5 and inc() == 10 end)
+check("reset works", function() local inc, reset = makeCounter(5); inc(); inc(); reset(); return inc() == 5 end)
+check("counters are independent", function() local a = makeCounter(1); local b = makeCounter(1); a(); a(); return b() == 1 end)
+`,
+      hints: ["Declare <code>local count = 0</code> inside <code>makeCounter</code>; both inner functions can see it."],
+      solution: R`
+local function makeCounter(step)
+  local count = 0
+  local function inc()
+    count = count + step
+    return count
+  end
+  local function reset()
+    count = 0
+  end
+  return inc, reset
+end
+
+local inc, reset = makeCounter(5)
+print(inc(), inc())
+` },
+  ],
+  project: {
+    title: "Dice Duel",
+    story: "You vs. the CPU, best of 5 rounds of rolling 2d6. Organize everything into small functions.",
+    reqs: [
+      "<code>roll(sides)</code> returns a random 1..sides (defaults to 6 with <code>or</code>)",
+      "<code>rollMany(count, sides)</code> returns <b>two</b> values: the total and the highest single roll",
+      "<code>makeScoreboard()</code> returns two closures: <code>addPoint(player)</code> and <code>getScores()</code>, which returns p1, p2",
+      "Play 5 rounds, printing both totals each round (if the totals tie, the highest single die wins)",
+      "Print the overall winner",
+    ],
+    stdin: "",
+    starter: R`
+math.randomseed(os.time())
+
+local function roll(sides)
+end
+
+local function rollMany(count, sides)
+end
+
+local function makeScoreboard()
+end
+
+-- TODO: play 5 rounds
+`,
+    hints: ["Keep <code>local p1, p2 = 0, 0</code> inside <code>makeScoreboard</code>, then use <code>if player == 1 then p1 = p1 + 1 else ... end</code>."],
+    stretch: ["Ask the player (with <code>io.read</code>) how many dice to roll each round", "Track the longest winning streak"],
+    solution: R`
+math.randomseed(os.time())
+
+local function roll(sides)
+  return math.random(1, sides or 6)
+end
+
+local function rollMany(count, sides)
+  local total, highest = 0, 0
+  for _ = 1, count do
+    local r = roll(sides)
+    total = total + r
+    highest = math.max(highest, r)
+  end
+  return total, highest
+end
+
+local function makeScoreboard()
+  local p1, p2 = 0, 0
+  local function addPoint(player)
+    if player == 1 then p1 = p1 + 1 else p2 = p2 + 1 end
+  end
+  local function getScores() return p1, p2 end
+  return addPoint, getScores
+end
+
+local addPoint, getScores = makeScoreboard()
+for round = 1, 5 do
+  local youT, youH = rollMany(2)
+  local cpuT, cpuH = rollMany(2)
+  local winner
+  if youT ~= cpuT then
+    winner = youT > cpuT and 1 or 2
+  else
+    winner = youH >= cpuH and 1 or 2
+  end
+  addPoint(winner)
+  print(string.format("Round %d: you %2d vs cpu %2d -> %s", round, youT, cpuT, winner == 1 and "you" or "cpu"))
+end
+local a, b = getScores()
+print(a > b and "You win the duel!" or "The CPU wins the duel!", a .. "-" .. b)
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 5
+{
+  id: "u5", num: 5, icon: "🌕", title: "Tables",
+  blurb: "Lua's only data structure: list, dictionary, record and object all in one. Indexes start at 1!",
+  badge: { icon: "🗂️", name: "Table Setter" },
+  lesson: [
+    ["h", "One structure to rule them all"],
+    ["p", `A <b>table</b> maps keys to values. Use integer keys 1..n and it's a list; use string keys and it's a dictionary (a HashMap, an object); mix both freely. Tables are the <i>only</i> data structure in Lua.`],
+    ["code", R`
+local fruits = {"apple", "banana", "cherry"}
+print(fruits[1])        -- arrays start at 1!
+print(#fruits)
+
+table.insert(fruits, "date")         -- append
+table.insert(fruits, 1, "avocado")   -- insert at position 1
+print(table.concat(fruits, ", "))
+
+local removed = table.remove(fruits) -- removes the last item
+print(removed, #fruits)
+
+for i, f in ipairs(fruits) do
+  print(i, f)
+end
+`],
+    ["warn", `Indexes start at <b>1</b>, and <code>t[0]</code> is just <code>nil</code>. <code>#t</code> counts the sequence 1..n, but if there are <code>nil</code> “holes” in the middle, the result is unreliable. Use <code>table.remove</code> rather than <code>t[i] = nil</code> on lists.`],
+    ["code", R`
+local student = {name = "Maya", grade = 12, ["fav language"] = "Lua"}
+print(student.name)              -- dot syntax for identifier keys
+print(student["fav language"])   -- brackets for anything else
+
+student.gpa = 3.8      -- add a key
+student.grade = nil    -- setting nil deletes a key
+
+for key, value in pairs(student) do   -- order is NOT guaranteed
+  print(key, value)
+end
+`],
+    ["p", `<code>pairs</code> visits every key, in no particular order. <code>ipairs</code> walks 1, 2, 3… in order and stops at the first <code>nil</code>. Use <code>ipairs</code> for lists and <code>pairs</code> for dictionaries.`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["List", "[1, 2]", "new ArrayList<>()", "{1, 2}"],
+      ["Dict", "{\"a\": 1}", "new HashMap<>()", "{a = 1}"],
+      ["Append", "lst.append(x)", "list.add(x)", "table.insert(t, x)"],
+      ["Join", "\", \".join(lst)", "String.join(\", \", list)", "table.concat(t, \", \")"],
+      ["Sort", "lst.sort(key=f)", "list.sort(cmp)", "table.sort(t, cmp)"],
+      ["Loop", "for x in lst:", "for (var x : list)", "for i, x in ipairs(t) do"],
+    ]}],
+    ["h", "Records: your SQL brain will love this"],
+    ["p", `A list of tables looks just like rows in a database table. A loop with <code>if</code> is <code>WHERE</code>, <code>table.sort</code> is <code>ORDER BY</code>, and building new tables from chosen fields is <code>SELECT</code>.`],
+    ["code", R`
+local students = {
+  {name = "Maya", score = 91},
+  {name = "Leo",  score = 78},
+  {name = "Ana",  score = 85},
+}
+
+-- ORDER BY score DESC
+table.sort(students, function(a, b) return a.score > b.score end)
+
+for rank, s in ipairs(students) do
+  print(rank .. ". " .. s.name .. " (" .. s.score .. ")")
+end
+`],
+    ["h", "Tables are references"],
+    ["code", R`
+local a = {1, 2, 3}
+local b = a        -- same table, not a copy
+b[1] = 99
+print(a[1])
+print({} == {})    -- two different tables
+`],
+    ["p", `Like Java objects and Python lists, assigning a table copies the <i>reference</i>. To copy the data, loop over it and build a new table.`],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`
+local t = {10, 20, 30}
+print(t[0])`, opts: ["10", "nil", "Error", "0"], a: 1,
+      why: "Lists start at index 1. Index 0 is just a key with no value." },
+    { q: "What does this print?", code: R`
+local t = {}
+t[1] = "a"
+t[2] = "b"
+print(#t)`, opts: ["0", "1", "2", "Error"], a: 2,
+      why: "Keys 1 and 2 form a sequence, so <code>#t</code> is 2." },
+    { q: "What does this print?", code: R`
+local t = {x = 1}
+print(t["x"], t.y)`, opts: ["1 nil", "nil nil", "1 Error", "x y"], a: 0,
+      why: "<code>t.x</code> is sugar for <code>t[\"x\"]</code>. Missing keys give <code>nil</code>." },
+    { q: "What does this print?", code: R`
+local t = {"a", "b", "c"}
+table.remove(t, 1)
+print(t[1])`, opts: ["a", "b", "nil", "c"], a: 1,
+      why: "<code>table.remove</code> shifts the remaining items down to close the gap." },
+    { q: "What does this print?", code: R`
+local a = {1, 2, 3}
+local b = a
+b[1] = 99
+print(a[1])`, opts: ["1", "99", "nil", "Error"], a: 1,
+      why: "<code>a</code> and <code>b</code> refer to the same table." },
+  ],
+  challenges: [
+    { id: "u5-c1", title: "Reverse (without mutating)",
+      task: `Write <code>reverse(arr)</code>, which returns a <b>new</b> list in reverse order. The original must stay unchanged.`,
+      starter: R`
+local function reverse(arr)
+end
+
+print(table.concat(reverse({1, 2, 3}), ","))
+`,
+      tests: R`
+expect("reverse({1,2,3})", function() return reverse({1, 2, 3}) end, {3, 2, 1})
+expect("reverse({})", function() return reverse({}) end, {})
+expect("reverse({\"x\"})", function() return reverse({"x"}) end, {"x"})
+check("original unchanged", function() local t = {1, 2}; reverse(t); return t[1] == 1 and t[2] == 2 end)
+`,
+      hints: ["<code>for i = #arr, 1, -1 do</code> walks backwards."],
+      solution: R`
+local function reverse(arr)
+  local out = {}
+  for i = #arr, 1, -1 do
+    out[#out + 1] = arr[i]
+  end
+  return out
+end
+
+print(table.concat(reverse({1, 2, 3}), ","))
+` },
+    { id: "u5-c2", title: "Word count",
+      task: `Write <code>wordCount(words)</code>: given a list of strings, return a dictionary of word → count.`,
+      starter: R`
+local function wordCount(words)
+end
+
+local counts = wordCount({"lua", "is", "fun", "lua"})
+print(counts.lua)
+`,
+      tests: R`
+expect("wordCount({a,b,a})", function() return wordCount({"a", "b", "a"}) end, {a = 2, b = 1})
+expect("wordCount({})", function() return wordCount({}) end, {})
+`,
+      hints: ["<code>counts[w] = (counts[w] or 0) + 1</code> is the classic idiom."],
+      solution: R`
+local function wordCount(words)
+  local counts = {}
+  for _, w in ipairs(words) do
+    counts[w] = (counts[w] or 0) + 1
+  end
+  return counts
+end
+
+local counts = wordCount({"lua", "is", "fun", "lua"})
+print(counts.lua)
+` },
+    { id: "u5-c3", title: "map and filter",
+      task: `Write <code>map(arr, fn)</code> and <code>filter(arr, pred)</code>, like Java streams or Python comprehensions. Both return new lists.`,
+      starter: R`
+local function map(arr, fn)
+end
+
+local function filter(arr, pred)
+end
+
+local squares = map({1, 2, 3}, function(x) return x * x end)
+print(table.concat(squares, " "))
+`,
+      tests: R`
+expect("map squares", function() return map({1, 2, 3}, function(x) return x * x end) end, {1, 4, 9})
+expect("filter evens", function() return filter({1, 2, 3, 4, 5, 6}, function(x) return x % 2 == 0 end) end, {2, 4, 6})
+expect("filter none", function() return filter({1, 3}, function(x) return x > 10 end) end, {})
+`,
+      hints: ["In <code>filter</code>, only append when <code>pred(v)</code> is truthy."],
+      solution: R`
+local function map(arr, fn)
+  local out = {}
+  for i, v in ipairs(arr) do out[i] = fn(v) end
+  return out
+end
+
+local function filter(arr, pred)
+  local out = {}
+  for _, v in ipairs(arr) do
+    if pred(v) then out[#out + 1] = v end
+  end
+  return out
+end
+
+local squares = map({1, 2, 3}, function(x) return x * x end)
+print(table.concat(squares, " "))
+` },
+    { id: "u5-c4", title: "GROUP BY club",
+      task: `SQL time. Write <code>groupNames(rows, groupField)</code>, which returns a dictionary mapping each group to a <b>list of names</b> in their original order. Think "which students are in each club?"`,
+      starter: R`
+local function groupNames(rows, groupField)
+end
+
+local students = {
+  {name = "Ana", club = "chess"},
+  {name = "Bo",  club = "art"},
+  {name = "Cy",  club = "chess"},
+}
+local groups = groupNames(students, "club")
+print(table.concat(groups.chess, ", "))
+`,
+      tests: R`
+expect("group by club", function()
+  return groupNames({{name="Ana",club="chess"},{name="Bo",club="art"},{name="Cy",club="chess"}}, "club")
+end, {chess = {"Ana", "Cy"}, art = {"Bo"}})
+expect("other field", function()
+  return groupNames({{name="X",team="red"},{name="Y",team="red"}}, "team")
+end, {red = {"X", "Y"}})
+expect("empty input", function() return groupNames({}, "club") end, {})
+`,
+      hints: ["<code>row[groupField]</code> reads a field whose name is stored in a variable.", "Create the list the first time you see a group: <code>groups[g] = groups[g] or {}</code>"],
+      solution: R`
+local function groupNames(rows, groupField)
+  local groups = {}
+  for _, row in ipairs(rows) do
+    local g = row[groupField]
+    groups[g] = groups[g] or {}
+    table.insert(groups[g], row.name)
+  end
+  return groups
+end
+
+local students = {
+  {name = "Ana", club = "chess"},
+  {name = "Bo",  club = "art"},
+  {name = "Cy",  club = "chess"},
+}
+local groups = groupNames(students, "club")
+print(table.concat(groups.chess, ", "))
+` },
+  ],
+  project: {
+    title: "Adventurer's Inventory",
+    story: "Build the inventory system for an RPG: adding loot, using items, sorting the bag, and computing its worth.",
+    reqs: [
+      "Store the inventory as a dictionary: item name → quantity",
+      "<code>addItem(inv, name, qty)</code> adds to any existing count",
+      "<code>removeItem(inv, name, qty)</code> returns true/false and deletes the key when the count hits 0",
+      "<code>listItems(inv)</code> prints items sorted alphabetically (collect the keys, then <code>table.sort</code>)",
+      "A <code>prices</code> table plus <code>totalValue(inv, prices)</code>",
+      "A demo at the bottom that uses every function",
+    ],
+    stdin: "",
+    starter: R`
+local prices = {potion = 25, arrow = 1, sword = 150, torch = 5}
+
+local function addItem(inv, name, qty)
+end
+
+local function removeItem(inv, name, qty)
+end
+
+local function listItems(inv)
+end
+
+local function totalValue(inv, prices)
+end
+
+-- demo
+local bag = {}
+addItem(bag, "potion", 2)
+addItem(bag, "arrow", 30)
+addItem(bag, "potion", 1)
+listItems(bag)
+`,
+    hints: ["For sorting, gather the keys first: <code>local names = {}; for k in pairs(inv) do names[#names+1] = k end</code>", "<code>string.format(\"%-10s x%d\", name, qty)</code> makes neat columns."],
+    stretch: ["Add a weight limit (a <code>weights</code> table)", "Crafting: <code>recipes = {torch = {stick = 1, coal = 1}}</code> plus <code>craft(inv, recipes, \"torch\")</code>"],
+    solution: R`
+local prices = {potion = 25, arrow = 1, sword = 150, torch = 5}
+
+local function addItem(inv, name, qty)
+  inv[name] = (inv[name] or 0) + qty
+end
+
+local function removeItem(inv, name, qty)
+  local have = inv[name] or 0
+  if have < qty then return false end
+  inv[name] = have - qty
+  if inv[name] == 0 then inv[name] = nil end
+  return true
+end
+
+local function listItems(inv)
+  local names = {}
+  for name in pairs(inv) do names[#names + 1] = name end
+  table.sort(names)
+  for _, name in ipairs(names) do
+    print(string.format("  %-8s x%d", name, inv[name]))
+  end
+end
+
+local function totalValue(inv, prices)
+  local total = 0
+  for name, qty in pairs(inv) do
+    total = total + (prices[name] or 0) * qty
+  end
+  return total
+end
+
+local bag = {}
+addItem(bag, "potion", 2)
+addItem(bag, "arrow", 30)
+addItem(bag, "potion", 1)
+addItem(bag, "sword", 1)
+print("Bag:")
+listItems(bag)
+print("Drink 3 potions:", removeItem(bag, "potion", 3))
+print("Drink another:", removeItem(bag, "potion", 1))
+listItems(bag)
+print("Worth: " .. totalValue(bag, prices) .. " gold")
+`,
+  },
+},
+];
+// ------------------------------------------------------------ UNITS 6–9
+UNITS.push(
+// ------------------------------------------------------------ UNIT 6
+{
+  id: "u6", num: 6, icon: "🌖", title: "Strings & Patterns",
+  blurb: "The string library, the colon shortcut, string.format, and Lua's lightweight alternative to regex.",
+  badge: { icon: "🧵", name: "Pattern Matcher" },
+  lesson: [
+    ["h", "The string library"],
+    ["code", R`
+local s = "Hello, Lua"
+print(s:upper())
+print(s:sub(1, 5))       -- characters 1 through 5 (both included)
+print(s:sub(-3))         -- negative = count from the end
+print(s:len(), #s)
+print(s:rep(2, " | "))
+print(s:find("Lua"))     -- start and end positions
+print(s:reverse())
+`],
+    ["p", `<code>s:upper()</code> is shorthand for <code>string.upper(s)</code>: the colon passes <code>s</code> as the first argument (more on <code>:</code> in Unit 7). Strings are immutable, so every function returns a new string.`],
+    ["code", R`
+-- string.format works like printf / String.format
+print(string.format("%-8s|%6.2f|%03d", "pi", math.pi, 7))
+print(string.format("%s scored %d%%", "Maya", 95))
+print(("%d + %d = %d"):format(2, 3, 2 + 3))
+`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["Format", "f\"{x:.2f}\"", "String.format(\"%.2f\", x)", "string.format(\"%.2f\", x)"],
+      ["Slice", "s[1:3]", "s.substring(1, 3)", "s:sub(2, 3)"],
+      ["Find", "s.find(\"x\")", "s.indexOf(\"x\")", "s:find(\"x\", 1, true)"],
+      ["Replace", "s.replace(a, b)", "s.replace(a, b)", "s:gsub(a, b)"],
+      ["Split", "s.split(\",\")", "s.split(\",\")", "(none: loop with gmatch)"],
+    ]}],
+    ["h", "Patterns: Lua's lightweight regex"],
+    ["table", { head: ["Pattern", "Matches"], code: [0], rows: [
+      [".", "any character"],
+      ["%a  %d  %s  %w", "letter, digit, whitespace, letter-or-digit"],
+      ["%p  %u  %l", "punctuation, uppercase, lowercase"],
+      ["%A  %D  %S ...", "uppercase class = the opposite (NOT a digit, etc.)"],
+      ["[aeiou]  [^aeiou]", "a set, or the complement of a set"],
+      ["+  *  -  ?", "1 or more, 0 or more (greedy), 0 or more (lazy), optional"],
+      ["^  $", "anchor to the start / end"],
+      ["( )", "capture a piece to return"],
+      ["%.  %%  %(", "escape a magic character with %"],
+    ]}],
+    ["code", R`
+local date = "2026-11-13"
+local y, m, d = date:match("(%d+)-(%d+)-(%d+)")
+print(y, m, d)
+
+for word in ("the quick brown fox"):gmatch("%a+") do
+  io.write("[", word, "]")
+end
+print()
+
+local cleaned = ("darn this darn bug"):gsub("darn", "****")
+print(cleaned)
+print(("hi bob"):gsub("%a+", string.upper))   -- replacement can be a function
+`],
+    ["warn", `Patterns are not full regex: there's no <code>|</code> alternation and no <code>{2,4}</code> counts. The escape character is <code>%</code>, not backslash, so to match a literal dot, write <code>%.</code>. Also remember that <code>gsub</code> returns <b>two</b> values, the new string and the number of replacements.`],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`print(("banana"):gsub("a", "o"))`, opts: ["bonono", "bonono 3", "3", "bananao"], a: 1,
+      why: "<code>gsub</code> returns the new string <i>and</i> the replacement count. Wrap it in parentheses to keep only the string." },
+    { q: "What does this print?", code: R`print(("hello"):sub(2, 3))`, opts: ["el", "ell", "ll", "e"], a: 0,
+      why: "Positions start at 1, and both ends are included: characters 2 and 3." },
+    { q: "What does this print?", code: R`print(("x=10, y=25"):match("y=(%d+)"))`, opts: ["y=25", "25", "10", "nil"], a: 1,
+      why: "<code>match</code> returns the capture (the part inside parentheses), as a string." },
+    { q: "What does this print?", code: R`print(tonumber(("3 apples"):match("%d+")) + 1)`, opts: ["31", "4", "Error", "3 apples1"], a: 1,
+      why: "<code>match</code> returns the string <code>\"3\"</code>, and <code>tonumber</code> turns it into the number 3." },
+    { q: "Which pattern matches a literal period?", code: R`-- "end." should match`, opts: ["\".\"", "\"\\\\.\"", "\"%.\"", "\"[.]\" only"], a: 2,
+      why: "<code>%</code> escapes magic characters in Lua patterns. (<code>\"[.]\"</code> also works, but <code>%.</code> is the idiom.)" },
+  ],
+  challenges: [
+    { id: "u6-c1", title: "Palindrome checker",
+      task: `Write <code>isPalindrome(s)</code>, ignoring case and anything that isn't a letter. <code>"A man, a plan, a canal: Panama"</code> → true.`,
+      starter: R`
+local function isPalindrome(s)
+end
+
+print(isPalindrome("Racecar"))
+`,
+      tests: R`
+expect("Racecar", function() return isPalindrome("Racecar") end, true)
+expect("A man, a plan, a canal: Panama", function() return isPalindrome("A man, a plan, a canal: Panama") end, true)
+expect("Lua", function() return isPalindrome("Lua") end, false)
+expect("empty string", function() return isPalindrome("") end, true)
+`,
+      hints: ["<code>s:lower():gsub(\"[^%a]\", \"\")</code> removes non-letters, but remember that gsub returns two values.", "Compare the cleaned string to <code>clean:reverse()</code>."],
+      solution: R`
+local function isPalindrome(s)
+  local clean = s:lower():gsub("[^%a]", "")
+  return clean == clean:reverse()
+end
+
+print(isPalindrome("Racecar"))
+` },
+    { id: "u6-c2", title: "Title Case",
+      task: `Write <code>capitalizeWords(s)</code>: <code>"hello lua world"</code> → <code>"Hello Lua World"</code>, and <code>"mIXed CaSe"</code> → <code>"Mixed Case"</code>.`,
+      starter: R`
+local function capitalizeWords(s)
+end
+
+print(capitalizeWords("hello lua world"))
+`,
+      tests: R`
+expect("hello lua world", function() return capitalizeWords("hello lua world") end, "Hello Lua World")
+expect("mIXed CaSe", function() return capitalizeWords("mIXed CaSe") end, "Mixed Case")
+`,
+      hints: ["<code>gsub</code> with the pattern <code>\"(%a)(%w*)\"</code> captures the first letter and the rest of each word.", "Pass a function as the replacement: <code>function(first, rest) ... end</code>"],
+      solution: R`
+local function capitalizeWords(s)
+  return (s:gsub("(%a)(%w*)", function(first, rest)
+    return first:upper() .. rest:lower()
+  end))
+end
+
+print(capitalizeWords("hello lua world"))
+` },
+    { id: "u6-c3", title: "Split",
+      task: `Lua has no <code>split</code>, so write one: <code>split(s, sep)</code> returns a list of the non-empty pieces (sep is a single character).`,
+      starter: R`
+local function split(s, sep)
+end
+
+local parts = split("a,b,c", ",")
+print(#parts, parts[1])
+`,
+      tests: R`
+expect('split("a,b,c", ",")', function() return split("a,b,c", ",") end, {"a", "b", "c"})
+expect('split("one two  three", " ")', function() return split("one two  three", " ") end, {"one", "two", "three"})
+expect('split("solo", ",")', function() return split("solo", ",") end, {"solo"})
+`,
+      hints: ["<code>s:gmatch(\"[^\" .. sep .. \"]+\")</code> finds every run of characters that aren't the separator."],
+      solution: R`
+local function split(s, sep)
+  local parts = {}
+  for piece in s:gmatch("[^" .. sep .. "]+") do
+    parts[#parts + 1] = piece
+  end
+  return parts
+end
+
+local parts = split("a,b,c", ",")
+print(#parts, parts[1])
+` },
+  ],
+  project: {
+    title: "Text Analyzer",
+    story: "Write a tool that takes any paragraph and reports statistics about it, like a mini word-processor's “word count” panel.",
+    reqs: [
+      "Lowercase the text and extract words with <code>gmatch(\"%a+\")</code>",
+      "Report the total word count and the number of unique words",
+      "Top 5 most frequent words (sort records by count descending, then alphabetically)",
+      "The longest word",
+      "Average word length to 2 decimals with <code>string.format</code>",
+      "Print a neat report with padded columns",
+    ],
+    stdin: "",
+    starter: R`
+local text = [[
+Lua is small. Lua is fast. The moon is small too, but the moon
+is not fast. Students learn Lua because Lua is simple, and simple
+tools are the best tools for building big things.
+]]
+
+-- TODO: count words
+-- TODO: build a list of {word = ..., count = ...} records and sort it
+-- TODO: print the report
+`,
+    hints: ["<code>[[ ... ]]</code> is a multi-line string literal.", "Sort comparator: <code>if a.count ~= b.count then return a.count &gt; b.count end; return a.word &lt; b.word</code>"],
+    stretch: ["Ignore stop-words like the, a, and, is", "Count sentences with the pattern <code>\"[.!?]\"</code>", "Draw a bar chart with <code>string.rep(\"█\", count)</code>"],
+    solution: R`
+local text = [[
+Lua is small. Lua is fast. The moon is small too, but the moon
+is not fast. Students learn Lua because Lua is simple, and simple
+tools are the best tools for building big things.
+]]
+
+local counts, total, letters, longest = {}, 0, 0, ""
+for word in text:lower():gmatch("%a+") do
+  total = total + 1
+  letters = letters + #word
+  counts[word] = (counts[word] or 0) + 1
+  if #word > #longest then longest = word end
+end
+
+local records = {}
+for word, count in pairs(counts) do
+  records[#records + 1] = {word = word, count = count}
+end
+table.sort(records, function(a, b)
+  if a.count ~= b.count then return a.count > b.count end
+  return a.word < b.word
+end)
+
+print(string.format("%-14s %d", "Total words:", total))
+print(string.format("%-14s %d", "Unique words:", #records))
+print(string.format("%-14s %s", "Longest:", longest))
+print(string.format("%-14s %.2f", "Avg length:", letters / total))
+print("Top 5:")
+for i = 1, math.min(5, #records) do
+  local r = records[i]
+  print(string.format("  %-8s %2d %s", r.word, r.count, string.rep("#", r.count)))
+end
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 7
+{
+  id: "u7", num: 7, icon: "🌗", title: "Metatables & OOP",
+  blurb: "No class keyword? No problem. Build classes, operators and inheritance from metatables.",
+  badge: { icon: "🧬", name: "Meta Mind" },
+  lesson: [
+    ["h", "Metatables: hooks on a table"],
+    ["p", `Lua has no <code>class</code> keyword. Instead, any table can have a <b>metatable</b>: another table whose special keys (<i>metamethods</i>, which start with <code>__</code>) change how the first table behaves. <code>setmetatable(t, mt)</code> attaches one and returns <code>t</code>.`],
+    ["code", R`
+local defaults = {color = "blue", size = "M"}
+local shirt = setmetatable({size = "L"}, {__index = defaults})
+print(shirt.color, shirt.size)   -- missing keys fall back to defaults
+
+local shout = setmetatable({}, {
+  __index = function(t, key) return key:upper() .. "!" end
+})
+print(shout.hello, shout.lua)
+`],
+    ["h", "The class pattern"],
+    ["code", R`
+local Vector = {}
+Vector.__index = Vector          -- objects look up missing keys in Vector
+
+function Vector.new(x, y)        -- "constructor": a plain function
+  return setmetatable({x = x, y = y}, Vector)
+end
+
+function Vector:length()         -- method: note the colon
+  return math.sqrt(self.x ^ 2 + self.y ^ 2)
+end
+
+Vector.__add = function(a, b) return Vector.new(a.x + b.x, a.y + b.y) end
+Vector.__tostring = function(v) return "(" .. v.x .. ", " .. v.y .. ")" end
+
+local a = Vector.new(3, 4)
+local b = Vector.new(1, 2)
+print(a:length())
+print(a + b)                     -- __add, then __tostring
+`],
+    ["p", `<code>Vector.__index = Vector</code> means “if an object is missing a key, look in <code>Vector</code>,” and that's where the methods live. It works like a JavaScript prototype, or like Java looking up a method in an object's class.`],
+    ["h", "The colon: obj:method()"],
+    ["p", `<code>function Vector:length()</code> is sugar for <code>function Vector.length(self)</code>, and calling <code>a:length()</code> is sugar for <code>a.length(a)</code>. Use <code>:</code> for methods and <code>.</code> for plain functions like <code>Vector.new</code>. Mixing them up is the #1 OOP error: <code>attempt to index a nil value (local 'self')</code>.`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["Class", "class Vector:", "class Vector {", "local Vector = {}; Vector.__index = Vector"],
+      ["Construct", "Vector(1, 2)", "new Vector(1, 2)", "Vector.new(1, 2)"],
+      ["Self", "self", "this", "self (via :)"],
+      ["To string", "__str__", "toString()", "__tostring"],
+      ["Operators", "__add__", "(not possible)", "__add"],
+      ["Inherit", "class Dog(Animal):", "extends Animal", "setmetatable(Dog, {__index = Animal})"],
+    ]}],
+    ["h", "Inheritance"],
+    ["code", R`
+local Animal = {}
+Animal.__index = Animal
+
+function Animal.new(name, sound)
+  local self = setmetatable({}, Animal)
+  self.name = name
+  self.sound = sound or "..."
+  return self
+end
+
+function Animal:speak()
+  return self.name .. " says " .. self.sound
+end
+
+local Dog = setmetatable({}, {__index = Animal})   -- Dog falls back to Animal
+Dog.__index = Dog
+
+function Dog.new(name)
+  local self = Animal.new(name, "woof")
+  return setmetatable(self, Dog)                    -- re-tag as a Dog
+end
+
+function Dog:fetch()
+  return self.name .. " fetches the ball!"
+end
+
+local d = Dog.new("Rex")
+print(d:speak())    -- found in Animal
+print(d:fetch())    -- found in Dog
+`],
+    ["table", { head: ["Metamethod", "Triggered by"], code: [0], rows: [
+      ["__index / __newindex", "reading / writing a missing key"],
+      ["__add __sub __mul __div", "+  -  *  /"],
+      ["__eq __lt __le", "==  <  <="],
+      ["__tostring", "tostring(obj) and print(obj)"],
+      ["__len", "#obj"],
+      ["__call", "obj(...): calling a table like a function"],
+      ["__concat", "obj .. other"],
+    ]}],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`
+local t = {n = 5}
+function t:get() return self.n end
+print(t.get(t))`, opts: ["5", "nil", "Error", "t"], a: 0,
+      why: "<code>t:get()</code> and <code>t.get(t)</code> are the same thing." },
+    { q: "Same <code>t</code>. What happens?", code: R`print(t.get())`, opts: ["5", "nil", "Error: attempt to index a nil value", "0"], a: 2,
+      why: "Called with <code>.</code> and no argument, <code>self</code> is <code>nil</code>, so <code>self.n</code> fails." },
+    { q: "What does this print?", code: R`
+local t = setmetatable({}, {
+  __index = function(_, k) return k .. "!" end
+})
+print(t.hello)`, opts: ["nil", "hello!", "Error", "hello"], a: 1,
+      why: "When a key is missing, Lua calls the <code>__index</code> function with the table and the key." },
+    { q: "Without an <code>__eq</code> metamethod, what does this print?", code: R`print(Vector.new(1, 2) == Vector.new(1, 2))`, opts: ["true", "false", "Error", "nil"], a: 1,
+      why: "Tables compare by reference unless you define <code>__eq</code>." },
+    { q: "What does <code>setmetatable(t, mt)</code> return?", code: R`local obj = setmetatable({}, mt)`, opts: ["mt", "t", "true", "nothing"], a: 1,
+      why: "It returns the first argument, which is why the one-line constructor <code>return setmetatable({...}, Class)</code> works." },
+  ],
+  challenges: [
+    { id: "u7-c1", title: "Stack class",
+      task: `Build a <code>Stack</code> class with <code>Stack.new()</code>, <code>:push(v)</code>, <code>:pop()</code> (returns nil when empty), <code>:peek()</code>, <code>:size()</code> and <code>:isEmpty()</code>.`,
+      starter: R`
+local Stack = {}
+Stack.__index = Stack
+
+function Stack.new()
+  -- return a new object whose metatable is Stack
+end
+
+function Stack:push(value)
+end
+
+function Stack:pop()
+end
+
+function Stack:peek()
+end
+
+function Stack:size()
+end
+
+function Stack:isEmpty()
+end
+
+local s = Stack.new()
+s:push(10)
+print(s:peek())
+`,
+      tests: R`
+expect("new stack is empty", function() return Stack.new():isEmpty() end, true)
+check("push, push, peek == 2, size == 2", function() local s = Stack.new(); s:push(1); s:push(2); return s:peek() == 2 and s:size() == 2 end)
+check("pop returns items in reverse order", function() local s = Stack.new(); s:push("a"); s:push("b"); return s:pop() == "b" and s:pop() == "a" and s:isEmpty() end)
+expect("pop on empty gives nil", function() return Stack.new():pop() end, nil)
+check("two stacks don't share items", function() local a, b = Stack.new(), Stack.new(); a:push(1); return b:size() == 0 end)
+`,
+      hints: ["Store the items in a field: <code>setmetatable({items = {}}, Stack)</code>", "<code>table.remove(self.items)</code> pops the last item, and returns nil if the list is empty."],
+      solution: R`
+local Stack = {}
+Stack.__index = Stack
+
+function Stack.new()
+  return setmetatable({items = {}}, Stack)
+end
+
+function Stack:push(value) table.insert(self.items, value) end
+function Stack:pop() return table.remove(self.items) end
+function Stack:peek() return self.items[#self.items] end
+function Stack:size() return #self.items end
+function Stack:isEmpty() return #self.items == 0 end
+
+local s = Stack.new()
+s:push(10)
+print(s:peek())
+` },
+    { id: "u7-c2", title: "Bank account",
+      task: `Build <code>BankAccount.new(owner, balance)</code> (balance defaults to 0). <code>:deposit(n)</code> returns the new balance. <code>:withdraw(n)</code> returns <code>true</code>, or <code>false, "insufficient funds"</code> and leaves the balance unchanged. <code>tostring(acct)</code> gives <code>"Ana: $50"</code>. Add <code>__lt</code> so that <code>a &lt; b</code> compares balances.`,
+      starter: R`
+local BankAccount = {}
+BankAccount.__index = BankAccount
+
+function BankAccount.new(owner, balance)
+end
+
+-- methods and metamethods here
+
+local acct = BankAccount.new("Ana")
+acct:deposit(50)
+print(acct)
+`,
+      tests: R`
+expect("deposit returns new balance", function() local a = BankAccount.new("Ana"); return a:deposit(50) end, 50)
+expect("tostring", function() local a = BankAccount.new("Ana"); a:deposit(50); return tostring(a) end, "Ana: $50")
+check("withdraw ok", function() local a = BankAccount.new("Bo", 100); return a:withdraw(30) == true and a.balance == 70 end)
+check("withdraw too much", function()
+  local a = BankAccount.new("Cy", 10)
+  local ok, msg = a:withdraw(50)
+  return ok == false and msg == "insufficient funds" and a.balance == 10
+end)
+check("__lt compares balances", function() return BankAccount.new("x", 5) < BankAccount.new("y", 9) end)
+`,
+      hints: ["Name the field <code>balance</code>; the tests read it directly.", "<code>BankAccount.__tostring = function(a) return a.owner .. \": $\" .. a.balance end</code>"],
+      solution: R`
+local BankAccount = {}
+BankAccount.__index = BankAccount
+
+function BankAccount.new(owner, balance)
+  return setmetatable({owner = owner, balance = balance or 0}, BankAccount)
+end
+
+function BankAccount:deposit(n)
+  self.balance = self.balance + n
+  return self.balance
+end
+
+function BankAccount:withdraw(n)
+  if n > self.balance then return false, "insufficient funds" end
+  self.balance = self.balance - n
+  return true
+end
+
+BankAccount.__tostring = function(a) return a.owner .. ": $" .. a.balance end
+BankAccount.__lt = function(a, b) return a.balance < b.balance end
+
+local acct = BankAccount.new("Ana")
+acct:deposit(50)
+print(acct)
+` },
+  ],
+  project: {
+    title: "RPG Battle Arena",
+    story: "Design a tiny class hierarchy for a turn-based battle, then let two heroes fight it out.",
+    reqs: [
+      "A <code>Character</code> class with <code>new(name, hp, attack)</code>, <code>:isAlive()</code>, <code>:takeDamage(n)</code> and <code>:attackTarget(other)</code>",
+      "<code>__tostring</code> shows <code>Name [HP: 12]</code>",
+      "A <code>Warrior</code> subclass with <code>armor</code> that reduces incoming damage (override <code>takeDamage</code>)",
+      "A <code>Mage</code> subclass with <code>mana</code>, where <code>:castFireball(target)</code> does double damage, costs mana, and falls back to a normal attack when out of mana",
+      "A battle loop: fighters alternate turns until one falls, printing each action",
+      "Use <code>math.random</code> for damage variety",
+    ],
+    stdin: "",
+    starter: R`
+math.randomseed(os.time())
+
+local Character = {}
+Character.__index = Character
+
+function Character.new(name, hp, attack)
+end
+
+-- TODO: isAlive, takeDamage, attackTarget, __tostring
+
+local Warrior = setmetatable({}, {__index = Character})
+Warrior.__index = Warrior
+-- TODO: Warrior.new(name), Warrior:takeDamage(n)
+
+local Mage = setmetatable({}, {__index = Character})
+Mage.__index = Mage
+-- TODO: Mage.new(name), Mage:castFireball(target)
+
+-- TODO: battle loop
+`,
+    hints: ["Inside an overridden method you can still call the parent: <code>Character.takeDamage(self, reduced)</code>", "Metamethods like <code>__tostring</code> are <b>not</b> inherited through <code>__index</code>, so copy them: <code>Warrior.__tostring = Character.__tostring</code>"],
+    stretch: ["Add a Healer class", "Team battles: lists of characters, targeting a random living enemy", "Sort fighters by HP with <code>__lt</code>"],
+    solution: R`
+math.randomseed(os.time())
+
+local Character = {}
+Character.__index = Character
+
+function Character.new(name, hp, attack)
+  return setmetatable({name = name, hp = hp, attack = attack}, Character)
+end
+function Character:isAlive() return self.hp > 0 end
+function Character:takeDamage(n)
+  self.hp = math.max(0, self.hp - n)
+  return n
+end
+function Character:attackTarget(other)
+  local dmg = other:takeDamage(self.attack + math.random(-2, 2))
+  print(self.name .. " hits " .. other.name .. " for " .. dmg)
+end
+Character.__tostring = function(c) return c.name .. " [HP: " .. c.hp .. "]" end
+
+local Warrior = setmetatable({}, {__index = Character})
+Warrior.__index = Warrior
+Warrior.__tostring = Character.__tostring
+function Warrior.new(name)
+  local self = Character.new(name, 40, 7)
+  self.armor = 2
+  return setmetatable(self, Warrior)
+end
+function Warrior:takeDamage(n)
+  return Character.takeDamage(self, math.max(1, n - self.armor))
+end
+
+local Mage = setmetatable({}, {__index = Character})
+Mage.__index = Mage
+Mage.__tostring = Character.__tostring
+function Mage.new(name)
+  local self = Character.new(name, 28, 5)
+  self.mana = 12
+  return setmetatable(self, Mage)
+end
+function Mage:castFireball(target)
+  if self.mana < 4 then return self:attackTarget(target) end
+  self.mana = self.mana - 4
+  local dmg = target:takeDamage(self.attack * 2)
+  print(self.name .. " casts FIREBALL on " .. target.name .. " for " .. dmg)
+end
+
+local a, b = Warrior.new("Brunhild"), Mage.new("Merlin")
+local turn = 1
+while a:isAlive() and b:isAlive() do
+  if turn % 2 == 1 then a:attackTarget(b) else b:castFireball(a) end
+  print("   " .. tostring(a) .. "  vs  " .. tostring(b))
+  turn = turn + 1
+end
+print((a:isAlive() and a.name or b.name) .. " wins!")
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 8
+{
+  id: "u8", num: 8, icon: "🌘", title: "Errors & Modules",
+  blurb: "error, pcall and assert in place of try/catch, plus how require and modules work.",
+  badge: { icon: "🛡️", name: "Error Tamer" },
+  lesson: [
+    ["h", "Raising and catching errors"],
+    ["p", `<code>error(msg)</code> throws, like <code>raise</code>/<code>throw</code>. To catch, call the function through <code>pcall</code> (“protected call”). It returns <code>true</code> plus the results, or <code>false</code> plus the error.`],
+    ["code", R`
+local function divide(a, b)
+  if b == 0 then error("cannot divide by zero") end
+  return a / b
+end
+
+local ok, result = pcall(divide, 10, 2)
+print(ok, result)
+
+ok, result = pcall(divide, 1, 0)
+print(ok, result)     -- the message includes "file:line:"
+`],
+    ["table", { head: ["", "Python", "Java", "Lua"], code: [1,2,3], rows: [
+      ["Catch", "try: ... except:", "try { } catch (E e) { }", "local ok, err = pcall(f, args)"],
+      ["Throw", "raise ValueError(\"x\")", "throw new X(\"x\");", "error(\"x\")"],
+      ["Assert", "assert x, \"msg\"", "assert x : \"msg\";", "assert(x, \"msg\")"],
+      ["Traceback", "traceback module", "e.printStackTrace()", "xpcall(f, debug.traceback)"],
+    ]}],
+    ["code", R`
+-- assert(value, message): errors if value is false/nil, otherwise returns it
+local n = assert(tonumber("42"), "not a number")
+print(n)
+
+local ok, err = pcall(function()
+  assert(tonumber("abc"), "not a number!")
+end)
+print(ok, err)
+
+-- error level 0 = no "file:line:" prefix
+print(pcall(error, "plain message", 0))
+
+-- you can throw tables, like exception objects
+local ok2, e = pcall(error, {code = 404, msg = "Not found"})
+print(ok2, e.code, e.msg)
+`],
+    ["h", "Modules and require"],
+    ["p", `A module is just a file that <b>returns a table</b>. <code>require("name")</code> runs <code>name.lua</code> once, caches the result, and returns it, like Python's <code>import</code>.`],
+    ["static", R`
+-- file: mathx.lua
+local M = {}
+
+function M.clamp(x, lo, hi)
+  return math.max(lo, math.min(hi, x))
+end
+
+return M
+
+-- file: main.lua
+local mathx = require("mathx")
+print(mathx.clamp(15, 0, 10))   --> 10
+`],
+    ["p", `A browser page has no files, so here we fake one with <code>package.preload</code>, which <code>require</code> checks before searching the disk:`],
+    ["code", R`
+package.preload["mathx"] = function()
+  local M = {}
+  function M.clamp(x, lo, hi)
+    return math.max(lo, math.min(hi, x))
+  end
+  return M
+end
+
+local mathx = require("mathx")
+print(mathx.clamp(15, 0, 10))
+print(mathx.clamp(-3, 0, 10))
+print(require("mathx") == mathx)   -- cached: the same table
+`],
+  ],
+  quiz: [
+    { q: "What does this print?", code: R`print(pcall(function() return 1, 2 end))`, opts: ["true", "1 2", "true 1 2", "false"], a: 2,
+      why: "On success, <code>pcall</code> returns <code>true</code> followed by every return value." },
+    { q: "What does this print?", code: R`
+local ok, e = pcall(error, {code = 7})
+print(ok, e.code)`, opts: ["false 7", "true 7", "false nil", "Error"], a: 0,
+      why: "Any value can be an error object, and tables are handy for structured errors." },
+    { q: "What does this print?", code: R`print(tonumber("12abc"), tonumber("0x1F"), tonumber(" 42 "))`, opts: ["12 31 42", "nil 31 42", "nil nil nil", "nil 31 nil"], a: 1,
+      why: "Partial numbers fail. Hex literals and surrounding spaces are fine." },
+    { q: "What does this print?", code: R`
+local ok, e = pcall(assert, false, "nope")
+print(e)`, opts: ["false", "nope", "assertion failed!", "nil"], a: 1,
+      why: "<code>assert</code> raises its message argument as the error." },
+    { q: "What does this print?", code: R`
+local ok = pcall(function()
+  local t = nil
+  return t.x
+end)
+print(ok)`, opts: ["true", "false", "nil", "The program crashes"], a: 1,
+      why: "Indexing nil raises an error, which <code>pcall</code> catches, so <code>ok</code> is false." },
+  ],
+  challenges: [
+    { id: "u8-c1", title: "Validated input",
+      task: `Write <code>parseAge(str)</code>, which returns the number or raises an error containing <code>"not a number"</code> or <code>"out of range"</code> (valid ages are 0–150). Then write <code>tryParse(str)</code>, which uses <code>pcall</code> and returns the age, or <code>nil, message</code>.`,
+      starter: R`
+local function parseAge(str)
+end
+
+local function tryParse(str)
+end
+
+print(tryParse("17"))
+print(tryParse("abc"))
+`,
+      tests: R`
+expect('parseAge("17")', function() return parseAge("17") end, 17)
+check('parseAge("abc") raises "not a number"', function()
+  local ok, e = pcall(parseAge, "abc")
+  return not ok and tostring(e):find("not a number") ~= nil
+end)
+check('parseAge("200") raises "out of range"', function()
+  local ok, e = pcall(parseAge, "200")
+  return not ok and tostring(e):find("out of range") ~= nil
+end)
+expect('tryParse("42")', function() return tryParse("42") end, 42)
+check('tryParse("x") returns nil + message', function()
+  local v, msg = tryParse("x")
+  return v == nil and type(msg) == "string" and msg:find("not a number") ~= nil
+end)
+`,
+      hints: ["<code>local n = tonumber(str); if not n then error(\"not a number\") end</code>", "<code>local ok, result = pcall(parseAge, str)</code>, then return based on <code>ok</code>."],
+      solution: R`
+local function parseAge(str)
+  local n = tonumber(str)
+  if not n then error("not a number") end
+  if n < 0 or n > 150 then error("out of range") end
+  return n
+end
+
+local function tryParse(str)
+  local ok, result = pcall(parseAge, str)
+  if ok then return result end
+  return nil, result
+end
+
+print(tryParse("17"))
+print(tryParse("abc"))
+` },
+    { id: "u8-c2", title: "Retry",
+      task: `Write <code>retry(fn, times)</code>: call <code>fn</code> until it succeeds and return its result plus the attempt number. If every attempt fails, return <code>nil</code> and the last error.`,
+      starter: R`
+local function retry(fn, times)
+end
+
+local calls = 0
+local result, attempts = retry(function()
+  calls = calls + 1
+  if calls < 3 then error("not yet") end
+  return "done"
+end, 5)
+print(result, attempts)
+`,
+      tests: R`
+check("succeeds on the 3rd try", function()
+  local calls = 0
+  local flaky = function() calls = calls + 1; if calls < 3 then error("not yet") end; return "ok" end
+  local result, attempts = retry(flaky, 5)
+  return result == "ok" and attempts == 3
+end)
+check("gives up and returns the error", function()
+  local result, err = retry(function() error("always", 0) end, 3)
+  return result == nil and tostring(err):find("always") ~= nil
+end)
+check("stops calling after success", function()
+  local calls = 0
+  retry(function() calls = calls + 1; return 1 end, 5)
+  return calls == 1
+end)
+`,
+      hints: ["<code>for attempt = 1, times do local ok, res = pcall(fn) ... end</code>"],
+      solution: R`
+local function retry(fn, times)
+  local lastErr
+  for attempt = 1, times do
+    local ok, res = pcall(fn)
+    if ok then return res, attempt end
+    lastErr = res
+  end
+  return nil, lastErr
+end
+
+local calls = 0
+local result, attempts = retry(function()
+  calls = calls + 1
+  if calls < 3 then error("not yet") end
+  return "done"
+end, 5)
+print(result, attempts)
+` },
+  ],
+  project: {
+    title: "Roster Importer",
+    story: "Import a class roster typed as comma-separated lines. Some lines are messy. Your program must skip the bad ones with a clear message and never crash.",
+    reqs: [
+      "A <code>roster</code> module (via <code>package.preload</code>) with <code>parseLine(line)</code>, which returns a record <code>{name = ..., grade = ..., club = ...}</code>",
+      "<code>parseLine</code> raises an error for: the wrong number of fields, a missing name, or a grade that isn't a number",
+      "Read lines until <code>quit</code> or the end of input",
+      "Use <code>pcall</code> so a bad line prints <code>Line 2 skipped: ...</code> and the import keeps going",
+      "At the end, print how many lines were imported and skipped, then list the imported students",
+    ],
+    stdin: "Maya,12,robotics\nLeo,eleven,chess\nAna,12\n,10,drama\nSam,12,drama\nquit",
+    starter: R`
+package.preload["roster"] = function()
+  local M = {}
+
+  -- splits "a,b,c" into {"a", "b", "c"} (empty fields are kept)
+  function M.split(line)
+    local fields = {}
+    for piece in (line .. ","):gmatch("(.-),") do
+      fields[#fields + 1] = piece
+    end
+    return fields
+  end
+
+  function M.parseLine(line)
+    local f = M.split(line)
+    -- TODO: error("...", 0) if #f ~= 3, if the name is empty,
+    --       or if tonumber(f[2]) is nil
+    -- TODO: otherwise return {name = ..., grade = ..., club = ...}
+  end
+
+  return M
+end
+
+local roster = require("roster")
+local students = {}
+local lineNo = 0
+
+while true do
+  local line = io.read()
+  if line == nil or line == "quit" then break end
+  lineNo = lineNo + 1
+  -- TODO: local ok, result = pcall(roster.parseLine, line)
+end
+
+-- TODO: print the summary and the list
+`,
+    hints: ["<code>error(\"grade must be a number\", 0)</code>: the <code>0</code> leaves out the line-number prefix.", "On success, <code>result</code> is the record, so add it with <code>table.insert(students, result)</code>."],
+    stretch: ["Reject duplicate names", "Print the students grouped by club (reuse your Unit 5 GROUP BY code)"],
+    solution: R`
+package.preload["roster"] = function()
+  local M = {}
+
+  function M.split(line)
+    local fields = {}
+    for piece in (line .. ","):gmatch("(.-),") do
+      fields[#fields + 1] = piece
+    end
+    return fields
+  end
+
+  function M.parseLine(line)
+    local f = M.split(line)
+    if #f ~= 3 then error("expected 3 fields, got " .. #f, 0) end
+    if f[1] == "" then error("name is required", 0) end
+    local grade = tonumber(f[2])
+    if not grade then error("grade must be a number, got '" .. f[2] .. "'", 0) end
+    return {name = f[1], grade = grade, club = f[3]}
+  end
+
+  return M
+end
+
+local roster = require("roster")
+local students = {}
+local lineNo, skipped = 0, 0
+
+while true do
+  local line = io.read()
+  if line == nil or line == "quit" then break end
+  lineNo = lineNo + 1
+  local ok, result = pcall(roster.parseLine, line)
+  if ok then
+    table.insert(students, result)
+  else
+    skipped = skipped + 1
+    print("Line " .. lineNo .. " skipped: " .. result)
+  end
+end
+
+print(string.format("\nImported %d, skipped %d", #students, skipped))
+for _, s in ipairs(students) do
+  print(string.format("  %-6s grade %d  (%s)", s.name, s.grade, s.club))
+end
+`,
+  },
+},
+// ------------------------------------------------------------ UNIT 9
+{
+  id: "u9", num: 9, icon: "🌙", title: "Coroutines (Bonus)",
+  blurb: "Functions that pause and resume: generators, schedulers and game scripting.",
+  badge: { icon: "🌀", name: "Time Bender" },
+  lesson: [
+    ["h", "Cooperative multitasking"],
+    ["p", `A <b>coroutine</b> is a function that can pause itself with <code>coroutine.yield</code> and be resumed later, keeping all of its local variables. They're like Python generators, but more general. Unlike Java threads, only one runs at a time, and they switch only when you say so. Game engines use them to script behavior that spans many frames (“walk to the door, wait 2 seconds, open it”).`],
+    ["code", R`
+local function countdown(n)
+  return coroutine.wrap(function()
+    for i = n, 1, -1 do
+      coroutine.yield(i)
+    end
+    coroutine.yield("Liftoff!")
+  end)
+end
+
+for value in countdown(3) do
+  print(value)
+end
+`],
+    ["code", R`
+local co = coroutine.create(function(a, b)
+  print("start", a, b)
+  local c = coroutine.yield(a + b)   -- pause, sending a + b out
+  print("got", c)                    -- c comes from the next resume
+  return "done"
+end)
+
+print(coroutine.resume(co, 1, 2))
+print(coroutine.status(co))
+print(coroutine.resume(co, "hi"))
+print(coroutine.status(co))
+print(coroutine.resume(co))
+`],
+    ["table", { head: ["Python", "Lua"], code: [0,1], rows: [
+      ["def gen(): yield x", "coroutine.wrap(function() coroutine.yield(x) end)"],
+      ["next(g)", "g()"],
+      ["g.send(v)", "coroutine.resume(co, v)"],
+    ]}],
+    ["tip", "wrap vs. create", `<code>coroutine.wrap</code> gives you a plain function to call. <code>coroutine.create</code> gives a coroutine object that you drive with <code>resume</code> and inspect with <code>status</code> (suspended, running or dead).`],
+  ],
+  quiz: [
+    { q: "How many lines does the countdown(3) example print?", code: R`for value in countdown(3) do print(value) end`, opts: ["3", "4", "5", "Infinite"], a: 1,
+      why: "3, 2, 1, then Liftoff!. Next the function ends, the wrapper returns nothing (nil), and the loop stops." },
+    { q: "After the first <code>resume</code> above, what is <code>coroutine.status(co)</code>?", code: R`print(coroutine.status(co))`, opts: ["running", "suspended", "dead", "normal"], a: 1,
+      why: "It is paused at <code>yield</code>, waiting to be resumed." },
+    { q: "What does this print?", code: R`
+local g = coroutine.wrap(function()
+  coroutine.yield(1)
+  coroutine.yield(2)
+end)
+print(g(), g())`, opts: ["1 1", "1 2", "2 2", "Error"], a: 1,
+      why: "Each call resumes the coroutine until its next yield." },
+    { q: "Resuming a finished coroutine returns…", code: R`print(coroutine.resume(deadCo))`, opts: ["true", "nil", "false  cannot resume dead coroutine", "It restarts from the top"], a: 2,
+      why: "<code>resume</code> never throws. It reports failure as <code>false, message</code>." },
+  ],
+  challenges: [
+    { id: "u9-c1", title: "Cycle generator",
+      task: `Write <code>cycle(list)</code>, which returns an <b>infinite</b> generator (using <code>coroutine.wrap</code>) that repeats the list's items forever. Also write <code>take(gen, n)</code>, which returns the first n values as a list.`,
+      starter: R`
+local function cycle(list)
+end
+
+local function take(gen, n)
+end
+
+print(table.concat(take(cycle({"red", "yellow", "green"}), 7), " "))
+`,
+      tests: R`
+expect("take 5 of red/green", function() return take(cycle({"red", "green"}), 5) end, {"red", "green", "red", "green", "red"})
+expect("single item", function() return take(cycle({"x"}), 3) end, {"x", "x", "x"})
+check("generators are independent", function()
+  local a, b = cycle({"a", "b"}), cycle({"a", "b"})
+  a()
+  return b() == "a"
+end)
+`,
+      hints: ["Inside the coroutine: <code>while true do for _, v in ipairs(list) do coroutine.yield(v) end end</code>"],
+      solution: R`
+local function cycle(list)
+  return coroutine.wrap(function()
+    while true do
+      for _, v in ipairs(list) do
+        coroutine.yield(v)
+      end
+    end
+  end)
+end
+
+local function take(gen, n)
+  local out = {}
+  for i = 1, n do out[i] = gen() end
+  return out
+end
+
+print(table.concat(take(cycle({"red", "yellow", "green"}), 7), " "))
+` },
+    { id: "u9-c2", title: "Round-robin scheduler",
+      task: `Write <code>roundRobin(tasks)</code>: given a list of functions (each one yields values), run them as coroutines taking turns, one step each per round, until all are dead. Return every yielded value in order.`,
+      starter: R`
+local function roundRobin(tasks)
+end
+
+local function A() coroutine.yield("A1"); coroutine.yield("A2") end
+local function B() coroutine.yield("B1") end
+print(table.concat(roundRobin({A, B}), " "))
+`,
+      tests: R`
+expect("A,B interleave", function()
+  local function A() coroutine.yield("A1"); coroutine.yield("A2") end
+  local function B() coroutine.yield("B1") end
+  return roundRobin({A, B})
+end, {"A1", "B1", "A2"})
+expect("three tasks", function()
+  local function mk(name, n) return function() for i = 1, n do coroutine.yield(name .. i) end end end
+  return roundRobin({mk("x", 1), mk("y", 3), mk("z", 2)})
+end, {"x1", "y1", "z1", "y2", "z2", "y3"})
+`,
+      hints: ["Turn each function into <code>coroutine.create(f)</code> first.", "When a coroutine finishes, <code>resume</code> returns <code>true</code> with no value, so only collect values that aren't nil.", "Keep looping while at least one coroutine isn't <code>\"dead\"</code>."],
+      solution: R`
+local function roundRobin(tasks)
+  local cos, out = {}, {}
+  for i, f in ipairs(tasks) do cos[i] = coroutine.create(f) end
+  local alive = true
+  while alive do
+    alive = false
+    for _, co in ipairs(cos) do
+      if coroutine.status(co) ~= "dead" then
+        local ok, value = coroutine.resume(co)
+        if value ~= nil then out[#out + 1] = value end
+        if coroutine.status(co) ~= "dead" then alive = true end
+      end
+    end
+  end
+  return out
+end
+
+local function A() coroutine.yield("A1"); coroutine.yield("A2") end
+local function B() coroutine.yield("B1") end
+print(table.concat(roundRobin({A, B}), " "))
+` },
+  ],
+  project: {
+    title: "Village Simulator",
+    story: "Script the townsfolk of a tiny village. Each NPC is a coroutine that does one action per game “tick.”",
+    reqs: [
+      "At least 3 NPCs, each written as an ordinary-looking script (a function with loops) that yields once per action",
+      "A game loop that runs 10 ticks and resumes every living NPC once per tick",
+      "Print <code>[tick 3] Guard: patrols the east gate</code>-style lines",
+      "At least one NPC whose script ends early (it goes home), and the loop must handle it",
+      "A helper <code>wait(n)</code> that yields n times (to “do nothing” for n ticks)",
+    ],
+    stdin: "",
+    starter: R`
+local function wait(n)
+  for _ = 1, n do coroutine.yield("...") end
+end
+
+local npcs = {
+  {name = "Guard", script = function()
+    while true do
+      coroutine.yield("patrols the north gate")
+      coroutine.yield("patrols the east gate")
+    end
+  end},
+  -- TODO: more NPCs (a merchant, a sleepy cat...)
+}
+
+-- TODO: create a coroutine for each NPC, then run 10 ticks
+`,
+    hints: ["Store <code>npc.co = coroutine.create(npc.script)</code> for each NPC.", "<code>local ok, action = coroutine.resume(npc.co)</code>, then print only if <code>action</code> is not nil."],
+    stretch: ["Let NPCs talk to each other through a shared message table", "Give the cat random behavior with <code>math.random</code>"],
+    solution: R`
+local function wait(n)
+  for _ = 1, n do coroutine.yield("...") end
+end
+
+local npcs = {
+  {name = "Guard", script = function()
+    while true do
+      coroutine.yield("patrols the north gate")
+      coroutine.yield("patrols the east gate")
+    end
+  end},
+  {name = "Merchant", script = function()
+    coroutine.yield("opens the shop")
+    for i = 1, 3 do coroutine.yield("sells potion #" .. i) end
+    coroutine.yield("closes up and goes home")
+  end},
+  {name = "Cat", script = function()
+    while true do
+      coroutine.yield("naps in the sun")
+      wait(2)
+      coroutine.yield("knocks a cup off a table")
+    end
+  end},
+}
+
+for _, npc in ipairs(npcs) do npc.co = coroutine.create(npc.script) end
+
+for tick = 1, 10 do
+  for _, npc in ipairs(npcs) do
+    if coroutine.status(npc.co) ~= "dead" then
+      local ok, action = coroutine.resume(npc.co)
+      if action then
+        print(string.format("[tick %2d] %-8s %s", tick, npc.name .. ":", action))
+      end
+    end
+  end
+end
+`,
+  },
+}
+);
+
+// ------------------------------------------------------------ CAPSTONES
+const CAPSTONES = [
+  { id: "cap-luaql", icon: "🗄️", title: "LuaQL: a mini query engine",
+    story: "Use everything (tables, closures, metatables, method chaining) to build a tiny SQL-style query engine. It has auto-checks!",
+    reqs: [
+      "<code>Query.from(rows)</code> copies the list (never modify the original)",
+      "<code>:where(fn)</code> keeps rows for which <code>fn(row)</code> is truthy",
+      "<code>:orderBy(field, \"asc\"|\"desc\")</code> sorts (asc is the default)",
+      "<code>:select(\"a\", \"b\", ...)</code> keeps only those fields",
+      "<code>:limit(n)</code>, <code>:count()</code>, <code>:run()</code> (returns the rows)",
+      "<code>:groupCount(field)</code> returns a dictionary of value → count",
+      "Every chainable method returns the query, so calls can be chained",
+    ],
+    starter: R`
+local students = {
+  {name = "Maya", grade = 12, gpa = 3.9,  club = "robotics"},
+  {name = "Leo",  grade = 11, gpa = 3.4,  club = "chess"},
+  {name = "Ana",  grade = 12, gpa = 3.6,  club = "robotics"},
+  {name = "Sam",  grade = 12, gpa = 3.95, club = "drama"},
+  {name = "Kai",  grade = 10, gpa = 3.1,  club = "chess"},
+}
+
+local Query = {}
+Query.__index = Query
+
+function Query.from(rows)
+end
+
+-- TODO: where, orderBy, select, limit, count, groupCount, run
+
+local function show(rows)
+  for _, r in ipairs(rows) do
+    local parts = {}
+    for k, v in pairs(r) do parts[#parts + 1] = k .. "=" .. tostring(v) end
+    table.sort(parts)
+    print("  " .. table.concat(parts, ", "))
+  end
+end
+
+-- SELECT name, gpa FROM students WHERE grade = 12 ORDER BY gpa DESC LIMIT 2
+show(Query.from(students)
+  :where(function(r) return r.grade == 12 end)
+  :orderBy("gpa", "desc")
+  :select("name", "gpa")
+  :limit(2)
+  :run())
+`,
+    tests: R`
+local data = {
+  {name = "Maya", grade = 12, gpa = 3.9,  club = "robotics"},
+  {name = "Leo",  grade = 11, gpa = 3.4,  club = "chess"},
+  {name = "Ana",  grade = 12, gpa = 3.6,  club = "robotics"},
+  {name = "Sam",  grade = 12, gpa = 3.95, club = "drama"},
+  {name = "Kai",  grade = 10, gpa = 3.1,  club = "chess"},
+}
+expect("full chain", function()
+  return Query.from(data):where(function(r) return r.grade == 12 end)
+    :orderBy("gpa", "desc"):select("name", "gpa"):limit(2):run()
+end, {{name = "Sam", gpa = 3.95}, {name = "Maya", gpa = 3.9}})
+expect("from(...):count()", function() return Query.from(data):count() end, 5)
+expect("orderBy name ascending", function() return Query.from(data):orderBy("name"):run()[1].name end, "Ana")
+expect("where club = chess, count", function() return Query.from(data):where(function(r) return r.club == "chess" end):count() end, 2)
+expect("groupCount club", function() return Query.from(data):groupCount("club") end, {robotics = 2, chess = 2, drama = 1})
+check("original list not reordered", function() Query.from(data):orderBy("name"):run(); return data[1].name == "Maya" end)
+expect("limit bigger than rows", function() return Query.from(data):limit(99):count() end, 5)
+`,
+    hints: ["Store the working rows inside the query object: <code>setmetatable({rows = copy}, Query)</code>.", "Each method replaces <code>self.rows</code> with a new list and ends with <code>return self</code>.", "<code>select(...)</code>: pack the field names with <code>local fields = {...}</code>."],
+    stretch: ["<code>:join(otherRows, \"key\")</code>", "<code>:avg(field)</code> and <code>:sum(field)</code>", "Make it lazy: record the operations and only run them in <code>:run()</code>"],
+    solution: R`
+local students = {
+  {name = "Maya", grade = 12, gpa = 3.9,  club = "robotics"},
+  {name = "Leo",  grade = 11, gpa = 3.4,  club = "chess"},
+  {name = "Ana",  grade = 12, gpa = 3.6,  club = "robotics"},
+  {name = "Sam",  grade = 12, gpa = 3.95, club = "drama"},
+  {name = "Kai",  grade = 10, gpa = 3.1,  club = "chess"},
+}
+
+local Query = {}
+Query.__index = Query
+
+function Query.from(rows)
+  local copy = {}
+  for i, r in ipairs(rows) do copy[i] = r end
+  return setmetatable({rows = copy}, Query)
+end
+
+function Query:where(pred)
+  local out = {}
+  for _, r in ipairs(self.rows) do
+    if pred(r) then out[#out + 1] = r end
+  end
+  self.rows = out
+  return self
+end
+
+function Query:orderBy(field, direction)
+  local desc = direction == "desc"
+  table.sort(self.rows, function(a, b)
+    if desc then return a[field] > b[field] end
+    return a[field] < b[field]
+  end)
+  return self
+end
+
+function Query:select(...)
+  local fields, out = {...}, {}
+  for i, r in ipairs(self.rows) do
+    local row = {}
+    for _, f in ipairs(fields) do row[f] = r[f] end
+    out[i] = row
+  end
+  self.rows = out
+  return self
+end
+
+function Query:limit(n)
+  local out = {}
+  for i = 1, math.min(n, #self.rows) do out[i] = self.rows[i] end
+  self.rows = out
+  return self
+end
+
+function Query:count() return #self.rows end
+
+function Query:groupCount(field)
+  local counts = {}
+  for _, r in ipairs(self.rows) do
+    counts[r[field]] = (counts[r[field]] or 0) + 1
+  end
+  return counts
+end
+
+function Query:run() return self.rows end
+
+local function show(rows)
+  for _, r in ipairs(rows) do
+    local parts = {}
+    for k, v in pairs(r) do parts[#parts + 1] = k .. "=" .. tostring(v) end
+    table.sort(parts)
+    print("  " .. table.concat(parts, ", "))
+  end
+end
+
+show(Query.from(students)
+  :where(function(r) return r.grade == 12 end)
+  :orderBy("gpa", "desc")
+  :select("name", "gpa")
+  :limit(2)
+  :run())
+`,
+  },
+  { id: "cap-adventure", icon: "🗝️", title: "Text Adventure Engine",
+    story: "Build a playable text adventure in which the rooms, items and locks are all just data in tables. Commands come from input.",
+    reqs: [
+      "Rooms stored as a table of tables (description, exits, items)",
+      "Commands: <code>look</code>, <code>go &lt;dir&gt;</code>, <code>take &lt;item&gt;</code>, <code>inventory</code>, <code>quit</code>",
+      "Parse commands with <code>string.match</code>",
+      "At least one locked exit that needs an item",
+      "A win condition, and helpful messages for unknown commands",
+      "At least 5 rooms of your own design",
+    ],
+    stdin: "look\ntake lamp\ngo north\ntake key\ngo south\ngo east\ngo east",
+    starter: R`
+local rooms = {
+  hall = {
+    desc = "You are in a dusty hall. Doors lead north and east.",
+    exits = {north = "library", east = "kitchen"},
+    items = {"lamp"},
+  },
+  library = {
+    desc = "Shelves of ancient books. A door leads south.",
+    exits = {south = "hall"},
+    items = {"key"},
+  },
+  kitchen = {
+    desc = "It smells like old soup. A locked door leads east; the hall is west.",
+    exits = {west = "hall", east = "garden"},
+    locked = {east = "key"},
+    items = {},
+  },
+  garden = {
+    desc = "Moonlight! You escaped.",
+    exits = {},
+    items = {},
+    win = true,
+  },
+}
+
+local current = "hall"
+local inventory = {}
+
+local function describe()
+  local room = rooms[current]
+  print(room.desc)
+  if #room.items > 0 then
+    print("You see: " .. table.concat(room.items, ", "))
+  end
+end
+
+describe()
+while true do
+  io.write("> ")
+  local line = io.read()
+  if not line then break end
+  print(line)
+  local verb, noun = line:lower():match("^(%a+)%s*(%a*)$")
+  -- TODO: handle look, go, take, inventory, quit
+  -- TODO: block locked exits unless the player has the item
+  -- TODO: print a victory message on entering a room with win = true
+end
+`,
+    hints: ["To take an item, loop over <code>room.items</code>, find it, and <code>table.remove</code> it into <code>inventory</code>.", "Write a <code>has(item)</code> helper that loops over the inventory."],
+    stretch: ["Save and load the game state as a string", "NPCs who talk (a table of dialogue lines)", "Use coroutines for timed events"],
+    solution: null,
+  },
+  { id: "cap-life", icon: "🧫", title: "Conway's Game of Life",
+    story: "Simulate the famous cellular automaton in the console using 2D tables. Watch a glider fly across the grid.",
+    reqs: [
+      "A 2D grid as a table of tables (<code>grid[row][col]</code> = true/false)",
+      "<code>countNeighbors(grid, r, c)</code> with edge handling (or wrap-around)",
+      "<code>step(grid)</code> returns a <b>new</b> grid following the rules",
+      "<code>render(grid)</code> prints with <code>#</code> and <code>.</code>",
+      "Run at least 8 generations starting from a glider",
+    ],
+    stdin: "",
+    starter: R`
+local ROWS, COLS = 10, 10
+
+local function emptyGrid()
+  local g = {}
+  for r = 1, ROWS do
+    g[r] = {}
+    for c = 1, COLS do g[r][c] = false end
+  end
+  return g
+end
+
+local grid = emptyGrid()
+-- a glider
+grid[1][2] = true
+grid[2][3] = true
+grid[3][1] = true; grid[3][2] = true; grid[3][3] = true
+
+local function render(g)
+  -- TODO
+end
+
+local function countNeighbors(g, r, c)
+  -- TODO
+end
+
+local function step(g)
+  -- TODO: live cells with 2-3 neighbors survive; dead cells with exactly 3 are born
+end
+
+for gen = 1, 8 do
+  print("Generation " .. gen)
+  render(grid)
+  grid = step(grid)
+end
+`,
+    hints: ["Loop <code>dr</code> and <code>dc</code> from -1 to 1, skipping (0, 0).", "<code>(g[r + dr] or {})[c + dc]</code> safely returns nil off the edge."],
+    stretch: ["Wrap around the edges (a torus)", "Load patterns from a string like <code>\".#.\\n..#\\n###\"</code>", "Detect when the grid stops changing"],
+    solution: null,
+  },
+];
+
+// ------------------------------------------------------------ PLAYGROUND SNIPPETS
+const SNIPPETS = [
+  { name: "Blank", code: "-- Write any Lua here\nprint(\"Hello from the playground!\")\n" },
+  { name: "Prime sieve", code: R`
+local N = 50
+local isPrime = {}
+for i = 2, N do isPrime[i] = true end
+for i = 2, math.floor(math.sqrt(N)) do
+  if isPrime[i] then
+    for j = i * i, N, i do isPrime[j] = false end
+  end
+end
+local primes = {}
+for i = 2, N do if isPrime[i] then primes[#primes + 1] = i end end
+print(table.concat(primes, " "))
+` },
+  { name: "ASCII moon", code: R`
+local R = 8
+for y = -R, R do
+  local line = ""
+  for x = -2 * R, 2 * R do
+    local dx, dy = x / 2, y
+    local inMoon = dx * dx + dy * dy <= R * R
+    local inShadow = (dx - 4) ^ 2 + dy * dy <= R * R
+    line = line .. ((inMoon and not inShadow) and "@" or " ")
+  end
+  print(line)
+end
+` },
+  { name: "Echo input", code: R`
+-- Type lines in the Input box, then Run
+local n = 0
+for _ = 1, 100 do
+  local line = io.read()
+  if not line then break end
+  n = n + 1
+  print(n .. ": " .. line:upper())
+end
+` },
+];
+
+// ------------------------------------------------------------ CHEAT SHEET
+const CHEAT = [
+  ["Comment", "# note", "// note", "-- note"],
+  ["Block comment", "\"\"\" ... \"\"\"", "/* ... */", "--[[ ... ]]"],
+  ["Print", "print(a, b)", "System.out.println(a)", "print(a, b)"],
+  ["Variable", "x = 5", "int x = 5;", "local x = 5"],
+  ["Null", "None", "null", "nil"],
+  ["Not equal", "a != b", "a != b", "a ~= b"],
+  ["Logic", "and or not", "&& || !", "and or not"],
+  ["Ternary", "a if c else b", "c ? a : b", "c and a or b"],
+  ["If", "if x: ... elif y:", "if (x) {} else if (y) {}", "if x then ... elseif y then ... end"],
+  ["For range", "for i in range(1, 11):", "for (int i=1; i<=10; i++)", "for i = 1, 10 do ... end"],
+  ["While", "while c:", "while (c) {}", "while c do ... end"],
+  ["Do-while", "(none)", "do {} while (c);", "repeat ... until stop"],
+  ["Continue", "continue", "continue;", "goto continue  /  ::continue::"],
+  ["Function", "def f(a):", "int f(int a) {}", "local function f(a) ... end"],
+  ["Lambda", "lambda x: x*2", "x -> x*2", "function(x) return x*2 end"],
+  ["List", "[1, 2, 3]", "List.of(1, 2, 3)", "{1, 2, 3}  (index starts at 1)"],
+  ["Dict", "{\"a\": 1}", "Map.of(\"a\", 1)", "{a = 1}"],
+  ["Length", "len(x)", "x.length / size()", "#x"],
+  ["Append", "lst.append(v)", "list.add(v)", "table.insert(t, v)"],
+  ["Loop list", "for i, v in enumerate(l):", "for (var v : list)", "for i, v in ipairs(t) do"],
+  ["Loop dict", "for k, v in d.items():", "for (var e : map.entrySet())", "for k, v in pairs(t) do"],
+  ["Concat", "\"a\" + \"b\"", "\"a\" + \"b\"", "\"a\" .. \"b\""],
+  ["Format", "f\"{n:.2f}\"", "String.format(\"%.2f\", n)", "string.format(\"%.2f\", n)"],
+  ["Substring", "s[0:3]", "s.substring(0, 3)", "s:sub(1, 3)"],
+  ["To number", "int(s) / float(s)", "Integer.parseInt(s)", "tonumber(s)  (nil if invalid)"],
+  ["Int divide", "7 // 2", "7 / 2", "7 // 2"],
+  ["Power", "2 ** 10", "Math.pow(2, 10)", "2 ^ 10"],
+  ["Increment", "x += 1", "x++", "x = x + 1"],
+  ["Exceptions", "try / except", "try / catch", "pcall(f, ...) / error(msg)"],
+  ["Class", "class A:", "class A {}", "A = {}; A.__index = A"],
+  ["Method call", "obj.m()", "obj.m()", "obj:m()"],
+  ["Import", "import m", "import pkg.M;", "local m = require(\"m\")"],
+];
+
+// ============================================================
+//  LUA QUEST — app engine
+// ============================================================
+(function () {
+"use strict";
+
+// ---------- Lua prelude (runs before every program) ----------
+const PRELUDE = R`
+io = io or {}
+function print(...)
+  local n = select("#", ...)
+  local parts = {}
+  for i = 1, n do parts[i] = tostring((select(i, ...))) end
+  __out(table.concat(parts, "\t") .. "\n")
+end
+io.write = function(...)
+  for i = 1, select("#", ...) do __out(tostring((select(i, ...)))) end
+  return io.stdout
+end
+io.read = function(fmt)
+  local line = __in()
+  if line == nil then return nil end
+  if fmt == "n" or fmt == "*n" then return tonumber(line) end
+  return line
+end
+
+local function ser(v, depth)
+  depth = depth or 0
+  if type(v) == "string" then return '"' .. v .. '"' end
+  if type(v) ~= "table" or depth > 3 then return tostring(v) end
+  local parts, n = {}, #v
+  for i = 1, n do parts[#parts + 1] = ser(v[i], depth + 1) end
+  local keys = {}
+  for k in pairs(v) do
+    if not (math.type(k) == "integer" and k >= 1 and k <= n) then keys[#keys + 1] = k end
+  end
+  table.sort(keys, function(a, b) return tostring(a) < tostring(b) end)
+  for _, k in ipairs(keys) do parts[#parts + 1] = tostring(k) .. " = " .. ser(v[k], depth + 1) end
+  return "{" .. table.concat(parts, ", ") .. "}"
+end
+local function deq(a, b)
+  if a == b then return true end
+  if type(a) ~= "table" or type(b) ~= "table" then return false end
+  for k, v in pairs(a) do if not deq(v, b[k]) then return false end end
+  for k in pairs(b) do if a[k] == nil then return false end end
+  return true
+end
+local function clean(e)
+  return (tostring(e):gsub("^main:%d+: ", ""))
+end
+function expect(label, thunk, expected)
+  local ok, actual = pcall(thunk)
+  if not ok then return __test(false, label, "error: " .. clean(actual)) end
+  local pass = deq(actual, expected)
+  __test(pass, label, pass and "" or ("expected " .. ser(expected) .. ", got " .. ser(actual)))
+end
+function near(label, thunk, expected)
+  local ok, actual = pcall(thunk)
+  if not ok then return __test(false, label, "error: " .. clean(actual)) end
+  local pass = type(actual) == "number" and math.abs(actual - expected) < 1e-9
+  __test(pass, label, pass and "" or ("expected about " .. tostring(expected) .. ", got " .. ser(actual)))
+end
+function check(label, thunk)
+  local ok, res = pcall(thunk)
+  if not ok then return __test(false, label, "error: " .. clean(res)) end
+  __test(res and true or false, label, res and "" or "check returned false")
+end
+`;
+
+// ---------- Fengari runner ----------
+function luaAvailable() { return !!(window.fengari && window.fengari.lua); }
+
+function runLua(code, stdin, withTests) {
+  const result = { out: "", err: null, tests: [], ok: true };
+  if (!luaAvailable()) {
+    result.err = "The Lua interpreter didn't load. This page needs internet access to cdn.jsdelivr.net (see the Teacher Guide for an offline option).";
+    result.ok = false;
+    return result;
+  }
+  const F = window.fengari, lua = F.lua, lauxlib = F.lauxlib, lualib = F.lualib, toL = F.to_luastring;
+  const L = lauxlib.luaL_newstate();
+  lualib.luaL_openlibs(L);
+
+  const inputs = (stdin || "").replace(/\r/g, "").split("\n");
+  if (inputs.length && inputs[inputs.length - 1] === "") inputs.pop();
+  let outLen = 0;
+  const outParts = [];
+  const fail = (L, msg) => { lua.lua_pushstring(L, toL(msg)); return lua.lua_error(L); };
+
+  const reg = (name, fn) => { lua.lua_pushcfunction(L, fn); lua.lua_setglobal(L, toL(name)); };
+  reg("__out", (L) => {
+    const s = lua.lua_tojsstring(L, 1) || "";
+    outLen += s.length;
+    if (outLen > 200000) return fail(L, "Stopped: too much output (over 200,000 characters).");
+    outParts.push(s);
+    return 0;
+  });
+  reg("__in", (L) => {
+    if (inputs.length === 0) lua.lua_pushnil(L); else lua.lua_pushstring(L, toL(inputs.shift()));
+    return 1;
+  });
+  reg("__test", (L) => {
+    result.tests.push({ ok: lua.lua_toboolean(L, 1), label: lua.lua_tojsstring(L, 2) || "", detail: lua.lua_tojsstring(L, 3) || "" });
+    return 0;
+  });
+
+  const start = Date.now();
+  const MASK = (lua.LUA_MASKCOUNT !== undefined) ? lua.LUA_MASKCOUNT : 8;
+  lua.lua_sethook(L, (L) => {
+    if (Date.now() - start > 4000) {
+      lua.lua_pushstring(L, toL("Stopped: your program ran for more than 4 seconds. Is there an infinite loop?"));
+      lua.lua_error(L);
+    }
+  }, MASK, 10000);
+
+  const exec = (src, name) => {
+    const buf = toL(src);
+    let st = lauxlib.luaL_loadbuffer(L, buf, buf.length, toL("=" + name));
+    if (st === lua.LUA_OK) st = lua.lua_pcall(L, 0, 0, 0);
+    if (st !== lua.LUA_OK) {
+      const msg = lua.lua_tojsstring(L, -1);
+      lua.lua_pop(L, 1);
+      return msg === null || msg === undefined ? "(error object is not a string)" : msg;
+    }
+    return null;
+  };
+
+  try {
+    const pe = exec(PRELUDE, "prelude");
+    if (pe) throw new Error("Prelude failed: " + pe);
+    const full = withTests ? code + "\n" + withTests : code;
+    result.err = exec(full, "main");
+  } catch (e) {
+    result.err = String(e && e.message ? e.message : e);
+  }
+  result.out = outParts.join("");
+  result.ok = !result.err;
+  return result;
+}
+
+// ---------- friendly error hints ----------
+const ERROR_HINTS = [
+  [/ran for more than/, "Check that your loop's condition eventually becomes false, or that a <code>break</code> is reached."],
+  [/attempt to call a nil value/, "You called something that doesn't exist. Check the spelling, and make sure a <code>local function</code> is defined <i>above</i> the line that calls it."],
+  [/attempt to index a nil value \((local|field|upvalue) 'self'\)/, "<code>self</code> is nil, which usually means you called a method with <code>.</code> instead of <code>:</code>."],
+  [/attempt to index a nil value/, "You used <code>.</code> or <code>[ ]</code> on something that is nil. Is the variable spelled right? Did a function forget to <code>return</code>?"],
+  [/attempt to perform arithmetic on a nil value/, "One of the values in your math is nil. Maybe <code>tonumber()</code> failed, or a variable was never set."],
+  [/attempt to concatenate a nil value/, "You're joining a nil with <code>..</code>. Check the variable, or wrap it in <code>tostring()</code>."],
+  [/attempt to compare/, "You're comparing values of different types (like a number with nil or a string)."],
+  [/near '!'|near '!='/, "Lua uses <code>~=</code> for “not equal” and <code>not</code> instead of <code>!</code>."],
+  [/near '\+'|near '\+\+'|near '-='/, "Lua has no <code>+=</code> or <code>++</code>. Write <code>x = x + 1</code>."],
+  [/'end' expected/, "Every <code>if</code>, <code>for</code>, <code>while</code> and <code>function</code> needs a matching <code>end</code>."],
+  [/'then' expected/, "<code>if</code> and <code>elseif</code> conditions must be followed by <code>then</code>."],
+  [/'do' expected/, "<code>for</code> and <code>while</code> loops need <code>do</code>."],
+  [/'<eof>' expected/, "There's an extra <code>end</code>, or a top-level <code>return</code> before the end of the file."],
+  [/unfinished string/, "A string is missing its closing quote."],
+];
+function errorHint(msg) {
+  for (const [re, hint] of ERROR_HINTS) if (re.test(msg)) return hint;
+  return "";
+}
+
+// ---------- helpers ----------
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const tc = (s) => String(s).replace(/^\n+/, "").replace(/\s+$/, "") + "\n";
+
+const KW = new Set("and break do else elseif end false for function goto if in local nil not or repeat return then true until while".split(" "));
+const BI = new Set("print require pairs ipairs setmetatable getmetatable tostring tonumber type pcall xpcall error assert select string table math io os coroutine self package".split(" "));
+function hl(src) {
+  const re = /(--\[\[[\s\S]*?(?:\]\]|$)|--[^\n]*)|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|\[\[[\s\S]*?(?:\]\]|$))|(\b0x[0-9a-fA-F]+\b|\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_][A-Za-z0-9_]*)/g;
+  let out = "", last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    const t = m[0];
+    if (m[1]) out += `<span class="tk-c">${esc(t)}</span>`;
+    else if (m[2]) out += `<span class="tk-s">${esc(t)}</span>`;
+    else if (m[3]) out += `<span class="tk-n">${esc(t)}</span>`;
+    else if (KW.has(t)) out += `<span class="tk-k">${t}</span>`;
+    else if (BI.has(t)) out += `<span class="tk-b">${t}</span>`;
+    else out += esc(t);
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last));
+}
+
+// ---------- state ----------
+const LS_KEY = "luaquest.v1";
+function defaultState() { return { xp: 0, quiz: {}, quizMiss: {}, ch: {}, chSol: {}, proj: {}, reqs: {}, badges: {}, code: {}, stdin: {}, ran: false, name: "" }; }
+let S = defaultState();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) S = Object.assign(defaultState(), JSON.parse(raw)); } catch (e) {}
+let saveTimer = null;
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }, 150); }
+
+const XP = { quiz: 10, ch: 50, chSol: 25, proj: 75, cap: 150, first: 10 };
+const LEVELS = [[0, "🌑", "New Moon"], [150, "🌒", "Waxing Crescent"], [400, "🌓", "First Quarter"], [750, "🌔", "Waxing Gibbous"], [1200, "🌕", "Full Moon"], [1800, "🌙", "Moon Master"]];
+function levelOf(xp) {
+  let i = 0;
+  for (let k = 0; k < LEVELS.length; k++) if (xp >= LEVELS[k][0]) i = k;
+  const next = LEVELS[i + 1];
+  return { i, icon: LEVELS[i][1], name: LEVELS[i][2], floor: LEVELS[i][0], next: next ? next[0] : null };
+}
+
+const qid = (u, i) => `${u.id}-q${i}`;
+const pid = (u) => `${u.id}-proj`;
+function unitProgress(u) {
+  let done = 0, total = 0;
+  u.quiz.forEach((q, i) => { total++; if (S.quiz[qid(u, i)]) done++; });
+  u.challenges.forEach((c) => { total++; if (S.ch[c.id]) done++; });
+  if (u.project) { total++; if (S.proj[pid(u)]) done++; }
+  return { done, total, pct: total ? Math.round(100 * done / total) : 0, complete: done === total };
+}
+
+const SPECIAL_BADGES = [
+  { id: "first-run", icon: "✨", name: "Hello, Moon", desc: "Ran your first Lua program" },
+  { id: "sharp-eye", icon: "👁️", name: "Sharp Eye", desc: "20 quiz questions right on the first try" },
+  { id: "no-peek", icon: "🙈", name: "No Peeking", desc: "Passed 10 challenges without viewing the solution" },
+  { id: "moonshot", icon: "🚀", name: "Moonshot", desc: "Finished a capstone project" },
+  { id: "full-moon", icon: "🌕", name: "Full Moon", desc: "Completed all 9 units" },
+];
+function allBadges() {
+  return UNITS.map((u) => ({ id: "unit-" + u.id, icon: u.badge.icon, name: u.badge.name, desc: `Completed Unit ${u.num}: ${u.title}` })).concat(SPECIAL_BADGES);
+}
+function checkBadges() {
+  const earn = (id) => {
+    if (S.badges[id]) return;
+    S.badges[id] = Date.now();
+    const b = allBadges().find((x) => x.id === id);
+    if (b) toast(`${b.icon} Badge unlocked: <b>${esc(b.name)}</b>`, "badge");
+  };
+  if (S.ran) earn("first-run");
+  UNITS.forEach((u) => { if (unitProgress(u).complete) earn("unit-" + u.id); });
+  const firstTry = Object.values(S.quiz).filter((v) => v === "first").length;
+  if (firstTry >= 20) earn("sharp-eye");
+  const clean = Object.keys(S.ch).filter((k) => S.ch[k] && !S.chSol[k]).length;
+  if (clean >= 10) earn("no-peek");
+  if (CAPSTONES.some((c) => S.proj[c.id])) earn("moonshot");
+  if (UNITS.every((u) => unitProgress(u).complete)) earn("full-moon");
+  save();
+}
+function addXP(n, why) {
+  const before = levelOf(S.xp).i;
+  S.xp += n;
+  toast(`+${n} XP · ${esc(why)}`, "xp");
+  const after = levelOf(S.xp);
+  if (after.i > before) toast(`${after.icon} Level up! You're now <b>${after.name}</b>`, "badge");
+  checkBadges();
+  save();
+  renderHeader();
+  renderNav();
+}
+
+// ---------- toasts ----------
+function toast(html, kind) {
+  const box = $("#toasts");
+  const el = document.createElement("div");
+  el.className = "toast " + (kind || "");
+  el.innerHTML = html;
+  box.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 3200);
+}
+
+// ---------- registry for runnable blocks ----------
+const REG = {};
+
+function runnableHTML(id, opts) {
+  const o = Object.assign({ kind: "example", stdin: null, saved: false }, opts);
+  REG[id] = Object.assign(REG[id] || {}, o);
+  const code = (o.saved && S.code[id] != null) ? S.code[id] : o.starter;
+  const lines = code.split("\n").length;
+  let btns = `<button class="btn primary" data-act="run" data-id="${id}">▶ Run</button>`;
+  if (o.kind === "challenge" || o.tests) btns += `<button class="btn ok" data-act="check" data-id="${id}">✓ Check</button>`;
+  if (o.hints && o.hints.length) btns += `<button class="btn ghost" data-act="hint" data-id="${id}">💡 Hint</button>`;
+  if (o.solution && SHOW_SOLUTIONS) btns += `<button class="btn ghost" data-act="sol" data-id="${id}">🔑 Solution</button>`;
+  btns += `<button class="btn ghost" data-act="reset" data-id="${id}" title="Restore the starting code">↺ Reset</button>`;
+  const stdinVal = o.stdin != null ? (S.stdin[id] != null ? S.stdin[id] : o.stdin) : null;
+  return `
+  <div class="runnable" data-rid="${id}">
+    <div class="editor" data-ed="${id}">
+      <pre class="hl" aria-hidden="true"></pre>
+      <textarea wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Lua code editor" rows="${lines}">${esc(code)}</textarea>
+    </div>
+    ${stdinVal != null ? `<label class="stdin-wrap"><span>Input <small>(one line per <code>io.read()</code>)</small></span><textarea class="stdin" data-stdin="${id}" spellcheck="false" rows="${Math.max(2, Math.min(6, stdinVal.split("\n").length))}">${esc(stdinVal)}</textarea></label>` : ""}
+    <div class="toolbar">${btns}</div>
+    <div class="hints" data-hints="${id}"></div>
+    <div class="confirm" data-confirm="${id}" hidden></div>
+    <div class="solution" data-solution="${id}" hidden></div>
+    <div class="out" data-out="${id}" hidden></div>
+  </div>`;
+}
+
+function sizeEditor(ed) {
+  const ta = $("textarea", ed), pre = $("pre", ed);
+  const cs = getComputedStyle(ta);
+  const LH = parseFloat(cs.lineHeight) || 21, PAD = parseFloat(cs.paddingTop) || 14;
+  const lines = ta.value.split("\n").length;
+  const h = lines * LH + PAD * 2 + 12;
+  ta.style.height = h + "px";
+  pre.style.height = h + "px";
+}
+function paintEditor(ed) {
+  const ta = $("textarea", ed), pre = $("pre", ed);
+  let v = ta.value;
+  if (v.endsWith("\n")) v += " ";
+  pre.innerHTML = hl(v);
+  pre.scrollLeft = ta.scrollLeft;
+  sizeEditor(ed);
+}
+function initEditors(root) {
+  $$(".editor", root).forEach((ed) => {
+    const ta = $("textarea", ed), pre = $("pre", ed);
+    const id = ed.dataset.ed;
+    paintEditor(ed);
+    ta.addEventListener("input", () => {
+      paintEditor(ed);
+      if (REG[id] && REG[id].saved) { S.code[id] = ta.value; save(); }
+    });
+    ta.addEventListener("scroll", () => { pre.scrollLeft = ta.scrollLeft; pre.scrollTop = ta.scrollTop; });
+    ta.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        doRun(id, false);
+        return;
+      }
+      if (e.key === "Tab" && !e.shiftKey && !e.altKey) {
+        e.preventDefault();
+        insertAtCursor(ta, "  ");
+      } else if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+        const before = ta.value.slice(0, ta.selectionStart);
+        const lineStart = before.lastIndexOf("\n") + 1;
+        const indent = (before.slice(lineStart).match(/^[ \t]*/) || [""])[0];
+        if (indent) { e.preventDefault(); insertAtCursor(ta, "\n" + indent); }
+      }
+    });
+  });
+  $$("textarea.stdin", root).forEach((t) => {
+    t.addEventListener("input", () => { S.stdin[t.dataset.stdin] = t.value; save(); });
+  });
+}
+function insertAtCursor(ta, text) {
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0, s) + text + ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + text.length;
+  ta.dispatchEvent(new Event("input"));
+}
+function getCode(id) { const ed = $(`.editor[data-ed="${id}"]`); return ed ? $("textarea", ed).value : ""; }
+function setCode(id, code) {
+  const ed = $(`.editor[data-ed="${id}"]`);
+  if (!ed) return;
+  const ta = $("textarea", ed);
+  ta.value = code;
+  ta.dispatchEvent(new Event("input"));
+}
+function getStdin(id) { const t = $(`textarea.stdin[data-stdin="${id}"]`); return t ? t.value : ""; }
+
+function doRun(id, withTests) {
+  const r = REG[id];
+  const outEl = $(`.out[data-out="${id}"]`);
+  if (!r || !outEl) return;
+  const res = runLua(getCode(id), getStdin(id), withTests ? r.tests : null);
+  if (!S.ran && !res.err) { S.ran = true; addXP(XP.first, "first program"); }
+  let html = "";
+  if (res.out) html += `<div class="out-label">Output</div><pre class="stdout">${esc(res.out)}</pre>`;
+  else if (!withTests && !res.err) html += `<div class="muted">(no output: add a <code>print</code>?)</div>`;
+  if (res.err) {
+    const hint = errorHint(res.err);
+    html += `<div class="err"><b>Error:</b> ${esc(res.err)}${hint ? `<div class="err-hint">💡 ${hint}</div>` : ""}</div>`;
+  }
+  if (withTests) {
+    const passed = res.tests.filter((t) => t.ok).length;
+    const total = res.tests.length;
+    const allPass = !res.err && total > 0 && passed === total;
+    html += `<div class="tests"><div class="tests-head ${allPass ? "pass" : "fail"}">${allPass ? "🎉 All checks passed!" : `${passed} / ${total} checks passed`}</div>` +
+      res.tests.map((t) => `<div class="test ${t.ok ? "pass" : "fail"}"><span>${t.ok ? "✓" : "✗"}</span><div><code>${esc(t.label)}</code>${t.detail ? `<div class="detail">${esc(t.detail)}</div>` : ""}</div></div>`).join("") +
+      (total === 0 && res.err ? `<div class="muted">The checks couldn't run. Fix the error above first.</div>` : "") + `</div>`;
+  }
+  outEl.innerHTML = html;
+  outEl.hidden = false;
+  if (withTests && !res.err && res.tests.length > 0 && res.tests.every((t) => t.ok)) onPassed(id);
+}
+
+function onPassed(id) {
+  const r = REG[id];
+  if (r.kind === "capstone") {
+    if (!S.proj[id]) { S.proj[id] = true; addXP(XP.cap, "capstone complete"); markProjectDone(id); }
+    return;
+  }
+  if (!S.ch[id]) {
+    S.ch[id] = true;
+    addXP(S.chSol[id] ? XP.chSol : XP.ch, "challenge passed");
+    const badge = $(`[data-chstatus="${id}"]`);
+    if (badge) { badge.textContent = "✓ Passed"; badge.className = "status done"; }
+  }
+}
+
+// ---------- actions ----------
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const act = b.dataset.act, id = b.dataset.id;
+  if (act === "run") doRun(id, false);
+  else if (act === "check") doRun(id, true);
+  else if (act === "reset") { setCode(id, REG[id].starter); const st = $(`textarea.stdin[data-stdin="${id}"]`); if (st && REG[id].stdin != null) { st.value = REG[id].stdin; delete S.stdin[id]; save(); } }
+  else if (act === "hint") showHint(id);
+  else if (act === "sol") askSolution(id);
+  else if (act === "sol-yes") showSolution(id);
+  else if (act === "sol-no") { const c = $(`[data-confirm="${id}"]`); c.hidden = true; }
+  else if (act === "sol-copy") { setCode(id, REG[id].solution); }
+  else if (act === "answer") answerQuiz(b);
+  else if (act === "req") toggleReq(b);
+  else if (act === "proj-done") finishProject(b.dataset.pid);
+  else if (act === "copy-report") copyReport();
+  else if (act === "reset-all") { const c = $("#reset-confirm"); c.hidden = false; }
+  else if (act === "reset-no") { $("#reset-confirm").hidden = true; }
+  else if (act === "reset-yes") { S = defaultState(); try { localStorage.removeItem(LS_KEY); } catch (err) {} renderHeader(); renderNav(); route(); toast("Progress reset.", ""); }
+  else if (act === "snippet") { setCode("playground", SNIPPETS[+b.dataset.i].code.replace(/^\n+/, "")); }
+  else if (act === "menu") { document.body.classList.toggle("nav-open"); }
+  else if (act === "goto") { location.hash = b.dataset.href; }
+});
+
+function showHint(id) {
+  const r = REG[id], box = $(`[data-hints="${id}"]`);
+  const shown = $$(".hint", box).length;
+  if (shown >= r.hints.length) { toast("No more hints. You've got this!", ""); return; }
+  const d = document.createElement("div");
+  d.className = "hint";
+  d.innerHTML = `<b>Hint ${shown + 1}/${r.hints.length}:</b> ${r.hints[shown]}`;
+  box.appendChild(d);
+}
+function askSolution(id) {
+  const r = REG[id], c = $(`[data-confirm="${id}"]`);
+  const penalty = r.kind === "challenge" && !S.ch[id] && !S.chSol[id];
+  c.innerHTML = `<span>${penalty ? "Show the solution? This challenge will then be worth 25 XP instead of 50." : "Show the sample solution?"}</span>
+    <button class="btn primary sm" data-act="sol-yes" data-id="${id}">Show it</button>
+    <button class="btn ghost sm" data-act="sol-no" data-id="${id}">Keep trying</button>`;
+  c.hidden = false;
+}
+function showSolution(id) {
+  const r = REG[id];
+  $(`[data-confirm="${id}"]`).hidden = true;
+  if (r.kind === "challenge" && !S.ch[id]) { S.chSol[id] = true; save(); }
+  const box = $(`[data-solution="${id}"]`);
+  box.innerHTML = `<div class="sol-head"><span>🔑 Sample solution</span><button class="btn ghost sm" data-act="sol-copy" data-id="${id}">Copy into editor</button></div><pre class="static">${hl(r.solution)}</pre>`;
+  box.hidden = false;
+}
+
+function answerQuiz(b) {
+  const id = b.dataset.qid, i = +b.dataset.i;
+  const [uid, qn] = id.split("-q");
+  const u = UNITS.find((x) => x.id === uid);
+  const q = u.quiz[+qn];
+  const box = b.closest(".quiz");
+  if (S.quiz[id]) return;
+  const why = $(".why", box);
+  if (i === q.a) {
+    b.classList.add("right");
+    $$(".opt", box).forEach((o) => o.disabled = true);
+    const first = !S.quizMiss[id];
+    S.quiz[id] = first ? "first" : "later";
+    why.innerHTML = `<b>${first ? "Correct!" : "Got it!"}</b> ${q.why}`;
+    why.className = "why right";
+    why.hidden = false;
+    if (first) addXP(XP.quiz, "quiz"); else { checkBadges(); save(); renderNav(); }
+    box.classList.add("done");
+  } else {
+    b.classList.add("wrong");
+    b.disabled = true;
+    S.quizMiss[id] = true;
+    save();
+    why.innerHTML = `<b>Not quite.</b> Try again. (No XP now, but it still counts toward finishing the unit.)`;
+    why.className = "why wrong";
+    why.hidden = false;
+  }
+}
+
+function toggleReq(b) {
+  const p = b.dataset.pid, i = +b.dataset.i;
+  S.reqs[p] = S.reqs[p] || {};
+  S.reqs[p][i] = !S.reqs[p][i];
+  b.classList.toggle("on", !!S.reqs[p][i]);
+  b.setAttribute("aria-checked", S.reqs[p][i] ? "true" : "false");
+  save();
+  const card = b.closest(".project");
+  const all = $$(".req", card).every((x) => x.classList.contains("on"));
+  const btn = $(`[data-act="proj-done"]`, card);
+  if (btn && !S.proj[p]) btn.disabled = !all;
+}
+function finishProject(p) {
+  if (S.proj[p]) return;
+  S.proj[p] = true;
+  const isCap = CAPSTONES.some((c) => c.id === p);
+  addXP(isCap ? XP.cap : XP.proj, isCap ? "capstone complete" : "project complete");
+  markProjectDone(p);
+}
+function markProjectDone(p) {
+  const st = $(`[data-pstatus="${p}"]`);
+  if (st) { st.textContent = "✓ Complete"; st.className = "status done"; }
+  const btn = $(`[data-act="proj-done"][data-pid="${p}"]`);
+  if (btn) { btn.disabled = true; btn.textContent = "✓ Project complete"; }
+}
+
+// ---------- progress report ----------
+function reportText() {
+  const nameEl = $("#student-name");
+  const name = (nameEl && nameEl.value.trim()) || S.name || "(no name)";
+  const lv = levelOf(S.xp);
+  const lines = [`LUA QUEST progress report: ${name}`, `Date: ${new Date().toLocaleDateString()}`, `Level: ${lv.name} (${S.xp} XP)`, ""];
+  UNITS.forEach((u) => {
+    const qd = u.quiz.filter((q, i) => S.quiz[qid(u, i)]).length;
+    const cd = u.challenges.filter((c) => S.ch[c.id]).length;
+    const peek = u.challenges.filter((c) => S.chSol[c.id]).length;
+    lines.push(`Unit ${u.num} ${u.title}: quiz ${qd}/${u.quiz.length}, challenges ${cd}/${u.challenges.length}${peek ? ` (${peek} solution viewed)` : ""}, project ${S.proj[pid(u)] ? "done" : "not done"}`);
+  });
+  lines.push("");
+  CAPSTONES.forEach((c) => lines.push(`Capstone ${c.title}: ${S.proj[c.id] ? "done" : "not done"}`));
+  const badges = allBadges().filter((b) => S.badges[b.id]).map((b) => b.name);
+  lines.push("", `Badges (${badges.length}): ${badges.join(", ") || "none yet"}`);
+  return lines.join("\n");
+}
+function copyReport() {
+  const nameEl = $("#student-name");
+  if (nameEl) { S.name = nameEl.value.trim(); save(); }
+  const txt = reportText();
+  const box = $("#report-box");
+  box.value = txt;
+  box.hidden = false;
+  try {
+    navigator.clipboard.writeText(txt).then(() => toast("Report copied. Paste it into your class submission.", ""), () => { box.select(); toast("Select the text below and copy it.", ""); });
+  } catch (e) { box.select(); toast("Select the text below and copy it.", ""); }
+}
+
+// ---------- header & nav ----------
+function renderHeader() {
+  const lv = levelOf(S.xp);
+  const pct = lv.next ? Math.round(100 * (S.xp - lv.floor) / (lv.next - lv.floor)) : 100;
+  $("#hdr-level").innerHTML = `<span class="lv-icon">${lv.icon}</span><span class="lv-text"><b>${lv.name}</b><small>${S.xp} XP${lv.next ? ` · ${lv.next - S.xp} to next` : " · max level"}</small></span>`;
+  $("#xpfill").style.width = pct + "%";
+}
+function navItem(href, icon, label, extra) {
+  const cur = (location.hash || "#home") === href;
+  return `<a href="${href}" class="nav-item${cur ? " cur" : ""}"><span class="ni-icon">${icon}</span><span class="ni-label">${label}</span>${extra || ""}</a>`;
+}
+function renderNav() {
+  let h = navItem("#home", "🏠", "Home") + navItem("#cheatsheet", "📋", "Cheat Sheet");
+  h += `<div class="nav-sec">Units</div>`;
+  UNITS.forEach((u) => {
+    const p = unitProgress(u);
+    h += navItem(`#unit-${u.num}`, u.icon, `${u.num}. ${u.title}`, `<span class="ni-prog ${p.complete ? "done" : ""}">${p.complete ? "✓" : p.pct + "%"}</span>`);
+  });
+  const capDone = CAPSTONES.filter((c) => S.proj[c.id]).length;
+  h += `<div class="nav-sec">Build</div>` + navItem("#capstone", "🚀", "Capstone", capDone ? `<span class="ni-prog done">✓</span>` : "") + navItem("#playground", "🧪", "Playground");
+  h += `<div class="nav-sec">For teachers</div>` + navItem("#teacher", "🍎", "Teacher Guide");
+  $("#nav").innerHTML = h;
+}
+
+// ---------- views ----------
+function tableHTML(t) {
+  const codeCols = new Set(t.code || []);
+  const cell = (c, j, tag) => `<${tag}>${codeCols.has(j) && tag === "td" ? `<code>${esc(c)}</code>` : (tag === "th" ? esc(c) : c)}</${tag}>`;
+  return `<div class="tbl-wrap"><table><thead><tr>${t.head.map((c, j) => cell(c, j, "th")).join("")}</tr></thead><tbody>${t.rows.map((r) => `<tr>${r.map((c, j) => cell(c, j, "td")).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function lessonHTML(u) {
+  return u.lesson.map((b, idx) => {
+    const [t, a, c] = b;
+    if (t === "h") return `<h3>${a}</h3>`;
+    if (t === "p") return `<p>${a}</p>`;
+    if (t === "code") return runnableHTML(`${u.id}-ex${idx}`, { kind: "example", starter: tc(a) });
+    if (t === "static") return `<pre class="static">${hl(tc(a))}</pre>`;
+    if (t === "tip") return `<div class="callout tip"><div class="callout-label">💡 ${a}</div>${c}</div>`;
+    if (t === "warn") return `<div class="callout warn"><div class="callout-label">⚠️ Watch out</div>${a}</div>`;
+    if (t === "table") return tableHTML(a);
+    return "";
+  }).join("");
+}
+function quizHTML(u) {
+  return u.quiz.map((q, i) => {
+    const id = qid(u, i), done = S.quiz[id];
+    return `<div class="quiz${done ? " done" : ""}">
+      <div class="q-head"><span class="q-num">Q${i + 1}</span><span class="q-text">${q.q}</span></div>
+      <pre class="static">${hl(tc(q.code))}</pre>
+      <div class="opts">${q.opts.map((o, j) => `<button class="opt${done && j === q.a ? " right" : ""}" data-act="answer" data-qid="${id}" data-i="${j}" ${done ? "disabled" : ""}>${esc(o)}</button>`).join("")}</div>
+      <div class="why${done ? " right" : ""}" ${done ? "" : "hidden"}>${done ? `<b>Correct!</b> ${q.why}` : ""}</div>
+    </div>`;
+  }).join("");
+}
+function challengeHTML(c, n) {
+  const st = S.ch[c.id] ? `<span class="status done" data-chstatus="${c.id}">✓ Passed</span>` : `<span class="status" data-chstatus="${c.id}">${S.chSol[c.id] ? "25 XP" : "50 XP"}</span>`;
+  return `<div class="card challenge">
+    <div class="card-head"><h4>Challenge ${n}: ${c.title}</h4>${st}</div>
+    <p>${c.task}</p>
+    ${runnableHTML(c.id, { kind: "challenge", starter: tc(c.starter), tests: c.tests, hints: c.hints, solution: c.solution ? tc(c.solution) : null, saved: true })}
+  </div>`;
+}
+function projectHTML(p, id, kind) {
+  const reqs = S.reqs[id] || {};
+  const allOn = p.reqs.every((r, i) => reqs[i]);
+  const done = S.proj[id];
+  const hasTests = !!p.tests;
+  return `<div class="card project">
+    <div class="card-head"><h4>${p.icon ? p.icon + " " : "🛠️ "}${p.title}</h4><span class="status${done ? " done" : ""}" data-pstatus="${id}">${done ? "✓ Complete" : (kind === "capstone" ? XP.cap : XP.proj) + " XP"}</span></div>
+    <p>${p.story}</p>
+    <div class="reqs-title">Requirements${hasTests ? "" : " (tick each one off as you finish it)"}</div>
+    <div class="reqs">${p.reqs.map((r, i) => `<button class="req${reqs[i] ? " on" : ""}" role="checkbox" aria-checked="${reqs[i] ? "true" : "false"}" data-act="req" data-pid="${id}" data-i="${i}"><span class="box"></span><span>${r}</span></button>`).join("")}</div>
+    ${runnableHTML(id, { kind: kind, starter: tc(p.starter), stdin: p.stdin != null ? p.stdin : null, hints: p.hints, solution: p.solution ? tc(p.solution) : null, tests: p.tests || null, saved: true })}
+    ${p.stretch && p.stretch.length ? `<div class="stretch"><b>⭐ Stretch goals</b><ul>${p.stretch.map((s) => `<li>${s}</li>`).join("")}</ul></div>` : ""}
+    ${hasTests ? `<p class="muted">${done ? "" : "This one completes automatically when every check passes."}</p>` :
+      `<button class="btn primary wide" data-act="proj-done" data-pid="${id}" ${done || !allOn ? "disabled" : ""}>${done ? "✓ Project complete" : "Mark project complete"}</button>`}
+  </div>`;
+}
+
+function viewUnit(u) {
+  const p = unitProgress(u);
+  const prev = UNITS[u.num - 2], next = UNITS[u.num];
+  return `
+  <section class="unit-hero">
+    <div class="uh-icon">${u.icon}</div>
+    <div><div class="eyebrow">Unit ${u.num} of ${UNITS.length}</div><h2>${u.title}</h2><p>${u.blurb}</p>
+    <div class="prog"><div class="prog-bar"><div style="width:${p.pct}%"></div></div><span>${p.done}/${p.total} done</span></div></div>
+  </section>
+  <nav class="subnav">
+    <button data-act="jump" data-to="sec-learn">📖 Learn</button>
+    <button data-act="jump" data-to="sec-quiz">❓ Quiz</button>
+    <button data-act="jump" data-to="sec-ch">🧩 Challenges</button>
+    <button data-act="jump" data-to="sec-proj">🛠️ Project</button>
+  </nav>
+  <section id="sec-learn" class="lesson">${lessonHTML(u)}</section>
+  <section id="sec-quiz"><h2 class="sec-title">❓ Predict the output</h2><p class="muted">10 XP for each question you get right on the first try.</p>${quizHTML(u)}</section>
+  <section id="sec-ch"><h2 class="sec-title">🧩 Challenges</h2><p class="muted">Write the code, then press <b>✓ Check</b> to run the automatic tests. Your code is saved in this browser.</p>${u.challenges.map((c, i) => challengeHTML(c, i + 1)).join("")}</section>
+  <section id="sec-proj"><h2 class="sec-title">🛠️ Mini project</h2>${projectHTML(u.project, pid(u), "project")}</section>
+  <div class="pager">
+    ${prev ? `<a class="btn ghost" href="#unit-${prev.num}">← ${prev.num}. ${prev.title}</a>` : `<a class="btn ghost" href="#home">← Home</a>`}
+    ${next ? `<a class="btn primary" href="#unit-${next.num}">${next.num}. ${next.title} →</a>` : `<a class="btn primary" href="#capstone">Capstone 🚀</a>`}
+  </div>`;
+}
+
+function viewHome() {
+  const lv = levelOf(S.xp);
+  const nextUnit = UNITS.find((u) => !unitProgress(u).complete);
+  const badges = allBadges();
+  return `
+  <section class="hero">
+    <div class="hero-moon" aria-hidden="true"></div>
+    <div class="hero-text">
+      <div class="eyebrow">An interactive course for programmers who already know Python, Java &amp; SQL</div>
+      <h1>Lua Quest</h1>
+      <p>Learn Lua by doing. Every unit has a short lesson with live code, a predict-the-output quiz, auto-checked challenges and a mini project. Earn XP, level up through the phases of the moon, and finish with a capstone.</p>
+      <div class="hero-cta">
+        <a class="btn primary big" href="#unit-${nextUnit ? nextUnit.num : 1}">${S.xp ? "Continue" : "Start"}: Unit ${nextUnit ? nextUnit.num : 1} →</a>
+        <a class="btn ghost big" href="#cheatsheet">📋 Cheat sheet</a>
+      </div>
+    </div>
+  </section>
+  <section class="stats">
+    <div class="stat"><div class="stat-big">${lv.icon}</div><div><b>${lv.name}</b><small>Level</small></div></div>
+    <div class="stat"><div class="stat-big">${S.xp}</div><div><b>XP</b><small>earned</small></div></div>
+    <div class="stat"><div class="stat-big">${UNITS.filter((u) => unitProgress(u).complete).length}/${UNITS.length}</div><div><b>Units</b><small>complete</small></div></div>
+    <div class="stat"><div class="stat-big">${Object.keys(S.badges).length}</div><div><b>Badges</b><small>of ${badges.length}</small></div></div>
+  </section>
+  <h2 class="sec-title">🗺️ The map</h2>
+  <div class="unit-grid">
+    ${UNITS.map((u) => { const p = unitProgress(u); return `
+      <a class="unit-card${p.complete ? " complete" : ""}" href="#unit-${u.num}">
+        <div class="uc-top"><span class="uc-icon">${u.icon}</span><span class="uc-num">Unit ${u.num}</span>${p.complete ? `<span class="uc-badge" title="${esc(u.badge.name)}">${u.badge.icon}</span>` : ""}</div>
+        <h3>${u.title}</h3><p>${u.blurb}</p>
+        <div class="prog"><div class="prog-bar"><div style="width:${p.pct}%"></div></div><span>${p.pct}%</span></div>
+      </a>`; }).join("")}
+    <a class="unit-card cap" href="#capstone"><div class="uc-top"><span class="uc-icon">🚀</span><span class="uc-num">Final</span></div><h3>Capstone</h3><p>Pick one: a SQL-style query engine, a text adventure, or Conway's Game of Life.</p></a>
+  </div>
+  <h2 class="sec-title">🏅 Badges</h2>
+  <div class="badges">${badges.map((b) => `<div class="badge${S.badges[b.id] ? " earned" : ""}" title="${esc(b.desc)}"><div class="b-icon">${b.icon}</div><b>${esc(b.name)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div>
+  <h2 class="sec-title">📤 Turn in your progress</h2>
+  <div class="card report">
+    <p>Progress is saved in <i>this browser</i> only. To show your teacher, enter your name and copy your report.</p>
+    <div class="row"><input id="student-name" type="text" placeholder="Your name" value="${esc(S.name)}"><button class="btn primary" data-act="copy-report">Copy progress report</button></div>
+    <textarea id="report-box" readonly hidden rows="10"></textarea>
+    <div class="danger-zone"><button class="btn ghost sm" data-act="reset-all">Reset all progress…</button>
+      <span id="reset-confirm" hidden>This erases all XP, badges and saved code in this browser. <button class="btn danger sm" data-act="reset-yes">Yes, reset</button><button class="btn ghost sm" data-act="reset-no">Cancel</button></span></div>
+  </div>`;
+}
+
+function viewCheat() {
+  return `
+  <section class="page-head"><div class="eyebrow">Reference</div><h2>📋 Python · Java · Lua cheat sheet</h2><p>Keep this open in another tab. The single biggest thing to remember: <b>tables start at 1</b>, and <b>only <code>nil</code> and <code>false</code> are falsy</b>.</p></section>
+  ${tableHTML({ head: ["", "Python", "Java", "Lua"], code: [1, 2, 3], rows: CHEAT })}
+  <h2 class="sec-title">🔟 Ten gotchas</h2>
+  <ol class="gotchas">
+    <li>Variables are <b>global</b> unless you write <code>local</code>.</li>
+    <li>Lists start at <b>1</b>; <code>t[0]</code> is <code>nil</code>.</li>
+    <li><code>0</code> and <code>""</code> are <b>truthy</b>.</li>
+    <li><code>~=</code> means not-equal; <code>!</code> doesn't exist.</li>
+    <li><code>^</code> is exponent, not XOR. <code>/</code> always returns a float.</li>
+    <li>No <code>+=</code>, <code>++</code> or <code>continue</code>.</li>
+    <li>String concatenation is <code>..</code>. <code>"1" + 1</code> does math (strings auto-convert), but <code>"1" == 1</code> is false.</li>
+    <li>Reading an undefined variable gives <code>nil</code>, not an error.</li>
+    <li><code>obj:m()</code> passes <code>self</code>; <code>obj.m()</code> doesn't.</li>
+    <li><code>for i = 1, n</code> <b>includes</b> n.</li>
+  </ol>`;
+}
+
+function viewCapstone() {
+  return `
+  <section class="page-head"><div class="eyebrow">Final project</div><h2>🚀 Capstone</h2><p>Choose <b>one</b> (or more, for glory). Each pulls together tables, functions, strings and metatables. LuaQL checks itself automatically; for the others, tick off the requirements and show your teacher a demo.</p></section>
+  ${CAPSTONES.map((c) => projectHTML(c, c.id, "capstone")).join("")}`;
+}
+
+function viewPlayground() {
+  return `
+  <section class="page-head"><div class="eyebrow">Sandbox</div><h2>🧪 Playground</h2><p>Free space to experiment. Your code is saved in this browser.</p></section>
+  <div class="snips">${SNIPPETS.map((s, i) => `<button class="chip" data-act="snippet" data-i="${i}">${esc(s.name)}</button>`).join("")}</div>
+  ${runnableHTML("playground", { kind: "playground", starter: tc(SNIPPETS[0].code), stdin: "", saved: true })}`;
+}
+
+function viewTeacher() {
+  return `
+  <section class="page-head"><div class="eyebrow">For teachers</div><h2>🍎 Teacher guide</h2><p>Lua Quest is a self-paced, browser-based course for students who already program in Python and/or Java and know some SQL. It focuses on what's <i>different</i> about Lua, then builds toward a capstone.</p></section>
+  <div class="card prose">
+    <h3>Suggested pacing (about 3–4 weeks)</h3>
+    ${tableHTML({ head: ["Week", "Units", "Notes"], rows: [
+      ["1", "1 Hello · 2 Decisions · 3 Loops", "Fast for experienced students; the gotchas (1-indexing, truthiness, ~=) are the real content."],
+      ["2", "4 Functions · 5 Tables", "Tables are the heart of Lua. Spend extra time on the records/SQL section and the inventory project."],
+      ["3", "6 Strings · 7 Metatables & OOP · 8 Errors", "Unit 7 is the hardest conceptual jump. Draw the __index lookup chain on the board."],
+      ["4", "9 Coroutines (optional) · Capstone", "LuaQL suits SQL-strong students; the text adventure suits creative ones; Life suits visual thinkers."],
+    ]})}
+    <h3>How it works</h3>
+    <ul>
+      <li><b>Real Lua in the browser.</b> Code runs on <a href="https://fengari.io" target="_blank" rel="noopener">Fengari</a>, a Lua 5.3 interpreter written in JavaScript, loaded from the jsDelivr CDN. Everything taught here works the same in Lua 5.4.</li>
+      <li><b>Input.</b> <code>io.read()</code> reads lines from the page's <i>Input</i> box. There's no file access in the browser.</li>
+      <li><b>Safety.</b> Programs that run longer than 4 seconds are stopped automatically, so an infinite loop won't freeze the page for good.</li>
+      <li><b>Scoring.</b> Quiz: 10 XP on the first try. Challenge: 50 XP (25 if the student viewed the solution first). Project: 75 XP. Capstone: 150 XP. Badges are awarded for finishing units and a few milestones.</li>
+      <li><b>Progress</b> is stored in each student's browser (localStorage). It doesn't sync across devices, and clearing browser data erases it. Students submit with <b>Home → Copy progress report</b>. The report is self-reported, so also collect their project code or a short demo.</li>
+    </ul>
+    <h3>Hosting it yourself</h3>
+    <ul>
+      <li>The whole course is <b>one HTML file</b>. Put it on any static host (GitHub Pages, Netlify, your school web server, or an LMS that serves HTML files).</li>
+      <li><b>Hide solutions:</b> open the file in a text editor, find <code>const SHOW_SOLUTIONS = true;</code> near the top of the script, and change it to <code>false</code>.</li>
+      <li><b>Offline / locked-down networks:</b> download <code>fengari-web.js</code> from npm (package <code>fengari-web</code>), place it next to the HTML file, and change the script tag's <code>src</code> to <code>fengari-web.js</code>.</li>
+      <li><b>Editing content:</b> all lessons, quizzes, challenges and tests live in plain JavaScript arrays (<code>UNITS</code>, <code>CAPSTONES</code>) in the file. Challenge tests are Lua snippets using <code>expect(label, fn, expected)</code>, <code>near(...)</code> and <code>check(label, fn)</code>.</li>
+    </ul>
+    <h3>Running Lua outside the browser</h3>
+    <ul>
+      <li><b>Install:</b> macOS <code>brew install lua</code> · Debian/Ubuntu <code>sudo apt install lua5.4</code> · Windows: binaries from <a href="https://luabinaries.sourceforge.net" target="_blank" rel="noopener">LuaBinaries</a> or <code>scoop install lua</code>. Then run <code>lua myfile.lua</code>.</li>
+      <li><b>Editor:</b> VS Code with the “Lua” extension (Lua Language Server) gives autocomplete and error squiggles.</li>
+      <li><b>Online:</b> the official demo at <a href="https://www.lua.org/demo.html" target="_blank" rel="noopener">lua.org/demo.html</a>.</li>
+    </ul>
+    <h3>Capstone rubric idea (20 pts)</h3>
+    ${tableHTML({ head: ["Criterion", "Points"], rows: [
+      ["Meets every listed requirement", "8"],
+      ["Good use of tables, functions and local scope", "4"],
+      ["Handles bad input without crashing (pcall / nil checks)", "3"],
+      ["Readable code: names, comments, small functions", "3"],
+      ["At least one stretch goal or original feature", "2"],
+    ]})}
+    <h3>Where students can go next</h3>
+    <ul>
+      <li><b>LÖVE</b> (love2d.org): real 2D games in Lua, a great follow-up unit.</li>
+      <li><b>Roblox Studio</b> uses <i>Luau</i>, a Lua dialect that adds <code>+=</code>, <code>continue</code> and optional type annotations.</li>
+      <li><b>PICO-8</b> and <b>TIC-80</b>: fantasy consoles programmed in Lua.</li>
+      <li><b>Neovim</b> configuration and plugins are written in Lua.</li>
+    </ul>
+  </div>`;
+}
+
+// ---------- router ----------
+function route() {
+  const h = (location.hash || "#home").slice(1);
+  const main = $("#main");
+  let html;
+  const m = h.match(/^unit-(\d+)$/);
+  if (m && UNITS[+m[1] - 1]) html = viewUnit(UNITS[+m[1] - 1]);
+  else if (h === "cheatsheet") html = viewCheat();
+  else if (h === "capstone") html = viewCapstone();
+  else if (h === "playground") html = viewPlayground();
+  else if (h === "teacher") html = viewTeacher();
+  else html = viewHome();
+  main.innerHTML = html;
+  initEditors(main);
+  renderNav();
+  document.body.classList.remove("nav-open");
+  window.scrollTo(0, 0);
+}
+function rerender() {
+  const y = window.scrollY;
+  route();
+  window.scrollTo(0, y);
+}
+document.addEventListener("click", (e) => {
+  const j = e.target.closest('[data-act="jump"]');
+  if (j) { const t = document.getElementById(j.dataset.to); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }
+});
+window.addEventListener("hashchange", route);
+
+renderHeader();
+renderNav();
+route();
+checkBadges();
+
+// warn if the interpreter failed to load
+setTimeout(() => { if (!luaAvailable()) $("#lua-warn").hidden = false; }, 6000);
+})();
+
+</script>
+</body>
+</html>
