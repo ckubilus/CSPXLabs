@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Socket Safe: CPU Installation Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #14171c; --bg2: #1a1e25; --panel: #1f242c; --panel2: #272d37; --line: #353d49;
+  --text: #eceff3; --muted: #a2abb8; --gold: #f5c531; --gold2: #ffe08a; --pcb: #2f9e6b;
+  --ok: #4fd08f; --bad: #ff6a5c; --r: 14px;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Chakra Petch", var(--sans); --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans);
+  background-image: linear-gradient(#ffffff06 1px, transparent 1px), linear-gradient(90deg, #ffffff06 1px, transparent 1px); background-size: 28px 28px; }
+a { color: var(--gold2); }
+h1, h2, h3, h4 { font-family: var(--display); line-height: 1.2; margin: 0 0 8px; }
+code { font-family: var(--mono); background: #ffffff12; padding: .1em .35em; border-radius: 5px; font-size: .9em; }
+svg { display: block; width: 100%; height: auto; }
+
+header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+  background: #14171cf2; border-bottom: 1px solid var(--line); }
+header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 4px;
+  background: repeating-linear-gradient(135deg, var(--gold) 0 12px, #14171c 12px 24px); opacity: .85; }
+.logo { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--text); text-decoration: none; white-space: nowrap; }
+.logo span { color: var(--gold); }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 5px 10px; font-size: 18px; cursor: pointer; }
+.hdr-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+#hdr-rank { display: flex; flex-direction: column; line-height: 1.15; text-align: right; }
+#hdr-rank b { font-size: 14px; } #hdr-rank small { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+.xpbar { width: 130px; height: 8px; border-radius: 99px; background: var(--panel2); overflow: hidden; border: 1px solid var(--line); }
+#xpfill { height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--gold2)); transition: width .5s; }
+
+.layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); max-width: 1200px; margin: 0 auto; }
+#nav { position: sticky; top: 60px; align-self: start; height: calc(100vh - 60px); overflow-y: auto; padding: 18px 10px 40px; border-right: 1px solid var(--line); }
+.nav-sec { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 18px 10px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; color: var(--text); text-decoration: none; font-size: 14.5px; }
+.nav-item:hover { background: var(--panel); }
+.nav-item.cur { background: var(--panel2); box-shadow: inset 3px 0 0 var(--gold); }
+.ni-icon { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px; background: var(--panel2); font: 600 13px var(--display); flex: none; }
+.ni-label { flex: 1; min-width: 0; }
+.ni-prog { font: 11px var(--mono); color: var(--muted); } .ni-prog.done { color: var(--ok); }
+#main { padding: 30px clamp(14px, 4vw, 44px) 80px; min-width: 0; }
+
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .13em; color: var(--gold); font-weight: 600; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: center; border: 1px solid var(--line); border-radius: 22px; padding: clamp(20px, 4vw, 40px); background: linear-gradient(135deg, #1e2a25, var(--bg2) 60%); }
+.hero h1 { font-size: clamp(44px, 8vw, 76px); margin: 6px 0 10px; letter-spacing: -.01em; }
+.hero h1 span { color: var(--gold); }
+.hero p { color: #d3d9e1; max-width: 60ch; margin: 0 0 10px; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.hero-art { max-width: 300px; justify-self: center; width: 100%; }
+.sec-title { font-size: 24px; margin: 38px 0 12px; }
+.page-head h2 { font-size: clamp(30px, 5vw, 42px); margin: 4px 0 8px; }
+.page-head p { color: #d3d9e1; max-width: 72ch; margin: 0 0 14px; }
+.muted { color: var(--muted); font-size: 14px; }
+
+.path { display: grid; gap: 10px; }
+.step-card { display: flex; gap: 14px; align-items: center; text-decoration: none; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; }
+.step-card:hover { border-color: var(--gold); }
+.step-card.complete { border-color: #4fd08f66; }
+.step-card > div { flex: 1; min-width: 0; }
+.sc-num { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--panel2); font: 700 20px var(--display); color: var(--gold); }
+.step-card.complete .sc-num { background: #4fd08f22; color: var(--ok); }
+.step-card h3 { font-size: 18px; margin: 0; } .step-card p { margin: 0 0 6px; color: var(--muted); font-size: 14px; }
+.prog { display: flex; align-items: center; gap: 10px; font: 12px var(--mono); color: var(--muted); }
+.prog-bar { flex: 1; height: 6px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.prog-bar div { height: 100%; background: linear-gradient(90deg, var(--pcb), var(--ok)); }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.badge { text-align: center; padding: 14px 8px; border-radius: var(--r); background: var(--panel); border: 1px dashed var(--line); opacity: .45; filter: grayscale(1); }
+.badge.earned { opacity: 1; filter: none; border: 1px solid #f5c53177; }
+.b-icon { font-size: 28px; } .badge b { display: block; font-size: 14px; } .badge small { color: var(--muted); font-size: 12px; line-height: 1.3; display: block; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px clamp(14px, 3vw, 24px); margin: 14px 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.row input { flex: 1; min-width: 150px; background: var(--bg2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 10px 12px; font: 16px var(--sans); }
+#report-box { width: 100%; margin-top: 8px; background: #0f1215; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: 13px/1.5 var(--mono); }
+.danger-zone { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.danger-zone span { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; } .danger-zone span[hidden] { display: none; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); padding: 9px 14px; border-radius: 10px; font: 600 15px var(--sans); cursor: pointer; text-decoration: none; }
+.btn:hover { filter: brightness(1.15); } .btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--gold); color: #1d1803; border-color: var(--gold); }
+.btn.ghost { background: transparent; } .btn.danger { background: #7a2a22; border-color: #b54236; }
+.btn.sm { padding: 5px 10px; font-size: 13px; } .btn.big { padding: 13px 18px; font-size: 16px; }
+
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 14px 0; }
+.fig { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.fig figcaption { padding: 10px 12px; font-size: 14px; color: #d3d9e1; }
+.svgbox { border-radius: 12px; overflow: hidden; }
+.fig .svgbox { border-radius: 0; }
+.rules { list-style: none; counter-reset: r; padding: 0; margin: 18px 0; display: grid; gap: 8px; }
+.rules li { counter-increment: r; display: grid; grid-template-columns: 44px 1fr; column-gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.rules li::before { content: counter(r); grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--gold); color: #1d1803; font: 700 20px var(--display); }
+.rules li b { font-family: var(--display); font-size: 17px; } .rules li span { color: #cdd3dc; font-size: 15px; grid-column: 2; }
+.callout { border-radius: 12px; padding: 12px 16px; margin: 14px 0; border: 1px solid; max-width: 80ch; }
+.callout.tip { background: #2f9e6b18; border-color: #2f9e6b77; } .callout.warn { background: #ff6a5c14; border-color: #ff6a5c77; }
+.callout-label { font: 600 16px var(--display); margin-bottom: 4px; }
+.tbl-wrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--panel2); font-family: var(--display); } tr:last-child td { border-bottom: 0; } td:first-child { white-space: nowrap; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.gal { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; }
+.gal h4 { font-size: 18px; color: var(--gold2); } .gal p { margin: 8px 0 0; font-size: 14px; color: #cdd3dc; }
+.gal-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.quiz { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin: 10px 0; }
+.quiz.done { border-color: #4fd08f55; }
+.q-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 10px; font-weight: 500; }
+.q-num { flex: none; font: 700 15px var(--display); color: var(--gold); }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.opt { text-align: left; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; font: 15px/1.4 var(--sans); cursor: pointer; }
+.opt:hover:not(:disabled) { border-color: var(--gold); }
+.opt.right { border-color: var(--ok); background: #4fd08f22; } .opt.wrong { border-color: var(--bad); background: #ff6a5c18; opacity: .75; text-decoration: line-through; }
+.opt:disabled { cursor: default; }
+.why { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14.5px; }
+.why.right { background: #4fd08f14; border: 1px solid #4fd08f44; } .why.wrong { background: #ff6a5c12; border: 1px solid #ff6a5c44; }
+.pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 36px; flex-wrap: wrap; }
+
+.dots { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 10px; }
+.dot { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: 600 14px var(--display); cursor: pointer; }
+.dot.cur { border-color: var(--gold); box-shadow: 0 0 0 2px #f5c53155; } .dot.done { color: var(--ok); border-color: #4fd08f66; }
+.spot-q { font-size: 17px; margin-bottom: 12px; }
+.spot-stage { max-width: 460px; margin: 0 auto; cursor: crosshair; touch-action: manipulation; }
+.spot-fb { margin-top: 12px; padding: 12px 14px; border-radius: 12px; font-size: 15.5px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.spot-fb[hidden] { display: none; }
+.spot-fb.right { background: #4fd08f1c; border: 1px solid #4fd08f66; } .spot-fb.wrong { background: #ff6a5c14; border: 1px solid #ff6a5c66; }
+
+.lvl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.lvl { text-align: left; display: flex; flex-direction: column; gap: 2px; background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; cursor: pointer; font: inherit; }
+.lvl:hover { border-color: var(--gold); } .lvl.done { border-color: #4fd08f66; }
+.lvl-num { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.lvl b { font: 700 20px var(--display); } .lvl small { color: var(--muted); }
+.lvl-st { margin-top: 8px; font: 13px var(--mono); color: var(--gold2); } .lvl.done .lvl-st { color: var(--ok); }
+
+.play-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.play-head h2 { font-size: clamp(24px, 4vw, 34px); margin: 2px 0 8px; } .play-head h2 small { font: 500 15px var(--sans); color: var(--muted); margin-left: 6px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { font: 13px var(--mono); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.chip.cur { border-color: var(--gold); color: var(--gold2); } .chip.done { border-color: #4fd08f66; color: var(--ok); }
+.coach { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; min-height: 52px; }
+.coach.good { border-left-color: var(--ok); } .coach.danger { border-left-color: var(--bad); background: #ff6a5c12; }
+.coach .fact { display: block; margin-top: 6px; color: #cdd3dc; font-size: 14.5px; }
+.bench { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.panel { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; }
+.panel figcaption { font: 600 13px var(--display); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+.tappable { cursor: pointer; }
+.empty-hand { aspect-ratio: 1; display: grid; place-items: center; text-align: center; color: var(--muted); background: #1c2129; border-radius: 12px; padding: 12px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.actions .btn { flex: 1 1 auto; }
+.rot { transition: transform .28s ease; transform-origin: 0 0; }
+.pulse { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+
+.certificate { text-align: center; padding: 26px 18px; border-radius: 18px; border: 2px solid var(--gold); background: linear-gradient(180deg, #2b2a1c, var(--panel)); margin: 14px 0; }
+.cert-seal { font-size: 52px; } .certificate h3 { font-size: clamp(26px, 5vw, 38px); margin: 6px 0; color: var(--gold2); }
+.certificate p { max-width: 52ch; margin: 0 auto 12px; }
+.cert-meta { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; font-family: var(--mono); font-size: 14px; }
+.need { padding-left: 0; list-style: none; } .need li { padding: 4px 0 4px 28px; position: relative; }
+.need li::before { content: "○"; position: absolute; left: 6px; color: var(--muted); } .need li.ok::before { content: "✓"; color: var(--ok); }
+.need.plain li::before { content: "•"; color: var(--gold); }
+.checklist h3 { color: var(--gold2); margin-top: 18px; font-size: 18px; letter-spacing: .04em; } .checklist h3:first-child { margin-top: 0; }
+.checklist ul { list-style: none; padding: 0; margin: 0; } .checklist li { padding: 6px 0 6px 32px; position: relative; border-bottom: 1px dashed var(--line); }
+.checklist li::before { content: ""; position: absolute; left: 4px; top: 9px; width: 16px; height: 16px; border: 2px solid var(--muted); border-radius: 4px; }
+.stopbox { margin-top: 18px; padding: 14px; border-radius: 12px; text-align: center; background: #ff6a5c1c; border: 2px solid var(--bad); font-size: 17px; }
+.prose h3 { color: var(--gold2); margin-top: 24px; } .prose h3:first-child { margin-top: 0; } .prose li { margin: 6px 0; }
+
+#toasts { position: fixed; right: 14px; bottom: 14px; z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none; }
+.toast { background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 30px #0009; font-size: 14.5px; transform: translateY(20px); opacity: 0; transition: all .3s; max-width: 300px; }
+.toast.show { transform: none; opacity: 1; } .toast.xp { border-color: #f5c53199; } .toast.badge { border-color: var(--ok); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .menu-btn { display: block; }
+  #nav { position: fixed; top: 60px; left: 0; bottom: 0; width: 270px; z-index: 40; background: var(--bg2); transform: translateX(-105%); transition: transform .25s; height: auto; box-shadow: 10px 0 30px #0008; }
+  body.nav-open #nav { transform: none; }
+  .xpbar { display: none; }
+  .hero { grid-template-columns: 1fr; } .hero-art { max-width: 200px; order: -1; }
+}
+@media (max-width: 420px) { .bench { gap: 8px; } .panel { padding: 6px; } .panel figcaption { font-size: 11px; } }
+@media print { header, #nav, .pager, #toasts { display: none !important; } body { background: #fff; color: #000; } .layout { display: block; } .card { border-color: #999; background: #fff; } .checklist h3 { color: #000; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <button class="menu-btn" data-act="menu" aria-label="Open menu">☰</button>
+  <a class="logo" href="#home">Socket <span>Safe</span></a>
+  <div class="hdr-right"><div id="hdr-rank"></div><div class="xpbar" aria-hidden="true"><div id="xpfill"></div></div></div>
+</header>
+<div class="layout">
+  <nav id="nav" aria-label="Training navigation"></nav>
+  <main id="main"></main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<script>
+// ============================================================
+//  SOCKET SAFE — drawings (pure functions that return SVG text)
+//  Drawings are simplified teaching diagrams, not exact to scale.
+// ============================================================
+const SOCKETS = {
+  lga1151: { name: "LGA1151", brand: "intel", type: "lga", w: 150, h: 150, notches: [-38], ihs: [22, 20],
+    cpus: "Intel 6th, 7th, 8th and 9th gen Core", pins: "In the socket", shape: "Square · 2 notches" },
+  lga1200: { name: "LGA1200", brand: "intel", type: "lga", w: 150, h: 150, notches: [30], ihs: [22, 20],
+    cpus: "Intel 10th and 11th gen Core", pins: "In the socket", shape: "Square · 2 notches (moved)" },
+  lga1700: { name: "LGA1700", brand: "intel", type: "lga", w: 150, h: 180, notches: [-52, 40], ihs: [22, 22],
+    cpus: "Intel 12th, 13th and 14th gen Core", pins: "In the socket", shape: "Rectangle · 4 notches" },
+  lga1851: { name: "LGA1851", brand: "intel", type: "lga", w: 150, h: 180, notches: [-30, 62], ihs: [22, 22],
+    cpus: "Intel Core Ultra 200S series", pins: "In the socket", shape: "Rectangle · 4 notches (moved)" },
+  am4: { name: "AM4", brand: "amd", type: "pga", w: 160, h: 160, notches: [], ihs: [15, 15],
+    cpus: "AMD Ryzen 1000 to 5000 series", pins: "On the CPU", shape: "Square · no notches" },
+  am5: { name: "AM5", brand: "amd", type: "lga", w: 160, h: 160, notches: [-45], ihs: [20, 20],
+    cpus: "AMD Ryzen 7000, 8000 and 9000 series", pins: "In the socket", shape: "Square · 2 notches" },
+};
+
+const CPUS = [
+  { id: "i5-6500",  sock: "lga1151", gen: "6th gen",  l1: "INTEL CORE i5", l2: "i5-6500",   l3: "SR2L6 3.20GHZ", decoys: ["tl", "br"] },
+  { id: "i7-8700",  sock: "lga1151", gen: "8th gen",  l1: "INTEL CORE i7", l2: "i7-8700",   l3: "SR3QS 3.20GHZ", decoys: ["tr", "ihs"] },
+  { id: "i5-10400", sock: "lga1200", gen: "10th gen", l1: "INTEL CORE i5", l2: "i5-10400",  l3: "SRH3C 2.90GHZ", decoys: ["tl", "tr"] },
+  { id: "i7-12700", sock: "lga1700", gen: "12th gen", l1: "INTEL CORE i7", l2: "i7-12700",  l3: "SRL4Q 2.10GHZ", decoys: ["br", "ihs"] },
+  { id: "i5-14600K", sock: "lga1700", gen: "14th gen", l1: "INTEL CORE i5", l2: "i5-14600K", l3: "SRN43 3.50GHZ", decoys: ["tl", "tr", "br"] },
+  { id: "Ultra 5 245K", sock: "lga1851", gen: "Core Ultra 200S", l1: "CORE ULTRA 5", l2: "245K", l3: "SRQD2 4.20GHZ", decoys: ["tr", "br"] },
+  { id: "Ryzen 5 5600", sock: "am4", gen: "Ryzen 5000", l1: "AMD RYZEN 5", l2: "5600", l3: "100-000000927", decoys: ["tr", "ihs"] },
+  { id: "Ryzen 5 7600", sock: "am5", gen: "Ryzen 7000", l1: "AMD RYZEN 5", l2: "7600", l3: "100-000001015", decoys: ["tl", "br"] },
+];
+
+function cpuOutline(w, h, notches, r) {
+  const x = w / 2, y = h / 2, up = notches.slice().sort((a, b) => a - b);
+  let d = `M${-x},${-y} H${x}`;
+  for (const n of up) d += ` V${n - r} A${r},${r} 0 0 0 ${x},${n + r}`;
+  d += ` V${y} H${-x}`;
+  for (const n of up.slice().reverse()) d += ` V${n + r} A${r},${r} 0 0 0 ${-x},${n - r}`;
+  return d + " Z";
+}
+
+const CODE_CELLS = [0, 2, 3, 5, 6, 9, 10, 12, 14, 16, 17, 19, 21, 22, 24];
+
+// o.hl: draw a highlight ring around the gold triangle
+function drawCPU(cpu, o) {
+  o = o || {};
+  const s = SOCKETS[cpu.sock], w = s.w, h = s.h, x = w / 2, y = h / 2;
+  const amd = s.brand === "amd";
+  const ix = s.ihs[0], iy = s.ihs[1];
+  let g = "";
+  g += `<path data-hit="body" d="${cpuOutline(w, h, s.notches, 7)}" fill="${amd ? "#2f6a4f" : "#1f6b45"}" stroke="#0e3a25" stroke-width="1.5"/>`;
+  g += `<rect data-hit="body" x="${-x + ix}" y="${-y + iy}" width="${w - 2 * ix}" height="${h - 2 * iy}" rx="9" fill="#bfc5ce" stroke="#858d99" stroke-width="1.5"/>`;
+  g += `<rect x="${-x + ix + 4}" y="${-y + iy + 4}" width="${w - 2 * ix - 8}" height="${h - 2 * iy - 8}" rx="6" fill="#d3d8de" pointer-events="none"/>`;
+  // printing (decoy)
+  g += `<g data-hit="text" font-family="Arial, Helvetica, sans-serif" text-anchor="middle" fill="#3a424e">` +
+    `<rect x="-46" y="-34" width="92" height="54" fill="#d3d8de" opacity="0"/>` +
+    `<text y="-19" font-size="9.5" letter-spacing="0.8">${cpu.l1}</text>` +
+    `<text y="1" font-size="17" font-weight="700">${cpu.l2}</text>` +
+    `<text y="15" font-size="7.5">${cpu.l3}</text></g>`;
+  // tracking code (decoy)
+  const cx0 = x - ix - 27, cy0 = y - iy - 27;
+  g += `<g data-hit="code"><rect x="${cx0 - 2}" y="${cy0 - 2}" width="21" height="21" fill="#d3d8de" opacity="0"/>`;
+  for (const c of CODE_CELLS) g += `<rect x="${cx0 + (c % 5) * 3.4}" y="${cy0 + Math.floor(c / 5) * 3.4}" width="3.4" height="3.4" fill="#5d6673"/>`;
+  g += `</g>`;
+  // decoy dots
+  const pos = { tl: [-x + 9, -y + 9], tr: [x - 9, -y + 9], br: [x - 9, y - 9], ihs: [x - ix - 10, -y + iy + 10] };
+  for (const k of cpu.decoys) {
+    const p = pos[k], onIhs = k === "ihs";
+    g += `<circle data-hit="dot" cx="${p[0]}" cy="${p[1]}" r="10" fill="#000" opacity="0"/>`;
+    g += `<circle data-hit="dot" cx="${p[0]}" cy="${p[1]}" r="3.4" fill="${onIhs ? "#6a7380" : "#e6e9ed"}" stroke="${onIhs ? "#4d5560" : "#7d8591"}" stroke-width="1"/>`;
+  }
+  // THE mark: gold triangle, bottom-left corner
+  g += `<circle data-hit="tri" cx="${-x + 11}" cy="${y - 11}" r="15" fill="#000" opacity="0"/>`;
+  g += `<polygon data-hit="tri" points="${-x + 4},${y - 4} ${-x + 21},${y - 4} ${-x + 4},${y - 21}" fill="#f5c531" stroke="#8a6c0c" stroke-width="1"/>`;
+  if (o.hl) g += `<circle class="pulse" cx="${-x + 11}" cy="${y - 11}" r="19" fill="none" stroke="#ffe36b" stroke-width="2.5" stroke-dasharray="5 4" pointer-events="none"/>`;
+  return g;
+}
+
+// o.open, o.mark ("tri" | "dot"), o.hl, o.locked, o.cpu, o.rel (degrees, CPU relative to socket), o.bad
+function drawSocket(key, o) {
+  o = o || {};
+  const s = SOCKETS[key], w = s.w, h = s.h, x = w / 2, y = h / 2, F = 10;
+  const pga = s.type === "pga";
+  const frame = pga ? "#cfc8b6" : "#2b2f36", frameLine = pga ? "#9d9684" : "#525862";
+  let g = "";
+  for (const c of [[-1, -1], [1, -1], [1, 1], [-1, 1]])
+    g += `<circle data-hit="hole" cx="${c[0] * 113}" cy="${c[1] * 113}" r="6" fill="#060b09" stroke="#8a9199" stroke-width="2.5"/>`;
+  g += `<rect data-hit="frame" x="${-x - F}" y="${-y - F}" width="${w + 2 * F}" height="${h + 2 * F}" rx="6" fill="${frame}" stroke="${frameLine}" stroke-width="1.5"/>`;
+  const showField = o.open || pga;
+  if (showField) {
+    if (pga) {
+      g += `<rect data-hit="field" x="${-x}" y="${-y}" width="${w}" height="${h}" fill="#e4dfd1"/>`;
+      g += `<rect data-hit="field" x="${-x}" y="${-y}" width="${w}" height="${h}" fill="url(#p-pga)"/>`;
+      g += `<rect data-hit="field" x="-22" y="-22" width="44" height="44" rx="3" fill="#cfc8b6"/>`;
+    } else {
+      g += `<rect data-hit="field" x="${-x}" y="${-y}" width="${w}" height="${h}" fill="#4a3c14"/>`;
+      g += `<rect data-hit="field" x="${-x}" y="${-y}" width="${w}" height="${h}" fill="url(#p-lga)"/>`;
+      g += `<rect data-hit="field" x="-22" y="-22" width="44" height="44" rx="3" fill="#1d2126"/>`;
+    }
+  } else {
+    g += `<rect data-hit="frame" x="${-x}" y="${-y}" width="${w}" height="${h}" fill="#0d0f12" stroke="#3b4048"/>`;
+    g += `<text text-anchor="middle" y="-2" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#7c8590" letter-spacing="1" pointer-events="none">PROTECTIVE</text>`;
+    g += `<text text-anchor="middle" y="11" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#7c8590" letter-spacing="1" pointer-events="none">COVER</text>`;
+    g += `<rect x="${-x - 3}" y="${-y - 3}" width="${w + 6}" height="${h + 6}" rx="4" fill="none" stroke="#a4abb5" stroke-width="7" pointer-events="none"/>`;
+  }
+  if (o.cpu) {
+    const t = `rotate(${o.rel || 0})` + (o.bad ? " translate(5,-6) rotate(6)" : "");
+    if (o.bad) g += `<g transform="${t} translate(5,7)" opacity="0.45"><rect x="${-x}" y="${-y}" width="${w}" height="${h}" fill="#000"/></g>`;
+    g += `<g transform="${t}">${drawCPU(o.cpu, {})}`;
+    if (o.bad) g += `<rect x="${-x - 3}" y="${-y - 3}" width="${w + 6}" height="${h + 6}" fill="none" stroke="#ff5a4d" stroke-width="3" stroke-dasharray="8 5"/>`;
+    g += `</g>`;
+  }
+  if (showField && !pga) {
+    for (const n of s.notches) for (const sx of [-1, 1])
+      g += `<circle data-hit="key" cx="${sx * x}" cy="${n}" r="5.5" fill="${o.bad ? "#ff5a4d" : "#8c949f"}" stroke="${o.bad ? "#fff" : "#d5d9de"}" stroke-width="1.2"/>`;
+  }
+  if (o.locked && !pga) g += `<rect x="${-x - 3}" y="${-y - 3}" width="${w + 6}" height="${h + 6}" rx="4" fill="none" stroke="#a4abb5" stroke-width="9" pointer-events="none"/>`;
+  // lever
+  const px = x + F + 8;
+  const leverOpen = o.open && !o.locked;
+  g += `<g data-hit="lever" fill="none" stroke="#c9ced6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">` +
+    (leverOpen ? `<path d="M${px},${-y - 6} L${px + 19},${y - 40}"/>` : `<path d="M${px},${-y - 6} V${y - 6} h-9"/>`) +
+    `<circle cx="${px}" cy="${-y - 6}" r="3" fill="#c9ced6" stroke="none"/></g>`;
+  // THE mark on the board: bottom-left corner
+  const mx = -x - F - 8, my = y + F + 8;
+  g += `<circle data-hit="mark" cx="${mx}" cy="${my}" r="14" fill="#000" opacity="0"/>`;
+  g += o.mark === "dot"
+    ? `<circle data-hit="mark" cx="${mx}" cy="${my}" r="6.5" fill="#ffffff"/>`
+    : `<polygon data-hit="mark" points="${mx - 8},${my + 8} ${mx + 9},${my + 8} ${mx - 8},${my - 9}" fill="#ffffff"/>`;
+  if (o.hl) g += `<circle class="pulse" cx="${mx}" cy="${my}" r="14" fill="none" stroke="#ffe36b" stroke-width="2.5" stroke-dasharray="5 4" pointer-events="none"/>`;
+  return g;
+}
+
+const SVG_DEFS = `<defs>` +
+  `<pattern id="p-lga" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#e6c252"/></pattern>` +
+  `<pattern id="p-pga" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.3" fill="#4a473f"/></pattern>` +
+  `</defs>`;
+
+function svgWrap(inner, rot, o) {
+  o = o || {};
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-125 -125 250 250" role="img" aria-label="${o.label || ""}" class="${o.cls || ""}">` +
+    SVG_DEFS + `<rect x="-125" y="-125" width="250" height="250" fill="${o.bg || "#12251d"}"/>` +
+    `<g class="rot" transform="rotate(${rot || 0})" style="transform:rotate(${rot || 0}deg)">${inner}</g></svg>`;
+}
+
+// ============================================================
+//  SOCKET SAFE — course content
+// ============================================================
+const cpuById = (id) => CPUS.find((c) => c.id === id);
+
+// Practice levels. boardRot = which way the socket is mounted. startRot = how the CPU starts in your hand.
+const LEVELS = [
+  { cpu: "i5-6500", boardRot: 0, startRot: 90, mark: "tri", hl: true,
+    fact: "6th and 7th gen CPUs use LGA1151. So do 8th and 9th gen, but they need different motherboards. Same socket shape does not mean the board supports the chip." },
+  { cpu: "i7-8700", boardRot: 180, startRot: 0, mark: "dot", hl: true,
+    fact: "Notice the CPU's text ended up upside-down. That is completely normal. Boards mount the socket in whatever direction the designer chose, so the text tells you nothing. Only the triangle does." },
+  { cpu: "i5-10400", boardRot: 90, startRot: 270, mark: "tri", hl: false,
+    fact: "10th and 11th gen use LGA1200. It is the same size as LGA1151, but the notches are in a different place, so an 8th gen CPU will never sit flat in it." },
+  { cpu: "i7-12700", boardRot: 0, startRot: 180, mark: "dot", hl: false,
+    fact: "12th, 13th and 14th gen use LGA1700. The CPU is a rectangle with four notches. Rotated 180° it still looks like it fits the outline, which is why you check the triangle every time." },
+  { cpu: "i5-14600K", boardRot: 270, startRot: 90, mark: "tri", hl: false,
+    fact: "LGA1700's load plate clamps hard, and the lever feels stiff even when everything is right. So the lever can't tell you if the CPU is correct. Your eyes have to, before you touch the lever." },
+  { cpu: "Ultra 5 245K", boardRot: 180, startRot: 0, mark: "dot", hl: false,
+    fact: "Core Ultra 200S uses LGA1851. The CPU is the same outer size as LGA1700 but keyed differently, so the two are not interchangeable." },
+  { cpu: "Ryzen 5 5600", boardRot: 90, startRot: 0, mark: "tri", hl: false,
+    fact: "AM4 is the opposite of Intel: the pins are on the CPU and the socket has holes. There are no notches to help you, so the triangle is your only guide. Never set an AM4 CPU pins-down on the bench." },
+  { cpu: "Ryzen 5 7600", boardRot: 0, startRot: 270, mark: "tri", hl: false,
+    fact: "AM5 works like Intel: pins in the socket, a load plate, and notches on the CPU. Treat it with the same rules." },
+];
+
+const RULES = [
+  ["Find the gold triangle.", "Every CPU has one small gold triangle in one corner. That is the only orientation mark on the CPU."],
+  ["Find the mark on the board.", "The socket or the board next to it has a small triangle or dot at one corner."],
+  ["Triangle to mark.", "Turn the CPU until its gold triangle is at the same corner as the board's mark."],
+  ["Ignore everything else on the CPU.", "The text, the little dots and the square code are for the factory. They do not show direction. The text may end up sideways or upside-down."],
+  ["Check the notches.", "On Intel and AM5, the notches in the CPU's edges must sit around the keys in the socket. This is your second check."],
+  ["Lower it straight down. Zero force.", "Hold the CPU by its edges and set it down flat. It drops in under its own weight. Never slide it, and never touch the socket contacts."],
+  ["Not flat? STOP.", "If it rocks, sits high on one side or does not drop in, lift it straight out and start again at rule 1. Never press it, and never close the lever to “seat” it."],
+  ["Look before you lock.", "Only close the plate and lever after you have seen all three: triangle matches, notches around keys, CPU flat. Not sure? Ask the teacher before the lever, not after."],
+];
+
+const QUIZZES = {
+  rules: [
+    { q: "You lower the CPU and it rocks, or sits higher on one side. What do you do?",
+      opts: ["Press gently on the high corner until it clicks", "Close the load plate so the lever seats it", "Lift it straight out and re-check the triangle and notches", "Slide it around until it drops in"], a: 2,
+      why: "A correctly turned CPU drops in flat with zero force. If it doesn't, it is wrong. Pressing, clamping or sliding is exactly how CPUs get bent and socket pins get crushed." },
+    { q: "Which mark on the CPU tells you which way it goes?",
+      opts: ["The model number text", "The small gold triangle in one corner", "The little silver dots", "The square tracking code"], a: 1,
+      why: "The gold triangle is the only orientation mark. Dots, codes and text are factory markings." },
+    { q: "You matched the triangle to the board's mark, and now the CPU's text is upside-down compared to the motherboard's text. Now what?",
+      opts: ["Flip it so the text reads the right way", "Leave it. The triangle decides, not the text", "Get a different CPU", "Turn it 90°"], a: 1,
+      why: "Sockets are mounted in different directions on different boards. Upside-down text is normal." },
+    { q: "On Intel sockets from 6th gen to today, where are the fragile pins?",
+      opts: ["On the bottom of the CPU", "In the socket on the motherboard", "Under the cooler", "There aren't any"], a: 1,
+      why: "Intel CPUs have flat gold pads. The socket holds over a thousand hair-thin spring pins. Never touch them and never drop anything on them." },
+    { q: "On an AMD AM4 CPU (Ryzen 1000 to 5000), where are the pins?",
+      opts: ["On the bottom of the CPU", "In the socket", "On the cooler", "On top of the CPU"], a: 0,
+      why: "AM4 is a pin grid array: the pins are on the chip. Hold it by the edges and never set it pins-down on a hard surface." },
+    { q: "How do you hold a CPU?",
+      opts: ["By the edges only", "Pinched top and bottom", "By the corner with the triangle", "Any way, if you're careful"], a: 0,
+      why: "Edges only. Fingers on the pads or pins leave oil and can bend things." },
+    { q: "You have SEEN all three: triangle matches, notches are around the keys, CPU is flat. The Intel lever needs firm, steady pressure to close. Is that OK?",
+      opts: ["Yes. The plate clamps hard by design, and I already checked with my eyes", "No. It should take no effort at all", "Only if I take the CPU out first", "Only on AMD"], a: 0,
+      why: "Intel levers are stiff even when everything is right. That is why force can never be your check. If you have not seen all three, stop. If anything scrapes or crunches, stop." },
+    { q: "A CPU looks like the right size, but its notches do not line up with the socket's keys. What does that mean?",
+      opts: ["It's the wrong CPU for this socket, or it's turned the wrong way. Do not install it", "Notches don't matter", "Push harder so it settles", "The socket is defective"], a: 0,
+      why: "Notches and keys exist to stop exactly this. If they don't match, the CPU does not go in." },
+    { q: "You're not sure it's right. When do you ask the teacher?",
+      opts: ["After closing the lever", "After the PC fails to start", "Before closing the lever", "You don't. Figure it out"], a: 2,
+      why: "Before the lever, nothing is damaged yet. After the lever, it may already be too late." },
+  ],
+  sockets: [
+    { q: "Core i7-8700: which generation and socket?", opts: ["8th gen · LGA1151", "8th gen · LGA1200", "7th gen · LGA1151", "8th gen · LGA1700"], a: 0,
+      why: "The first digit of a four-digit model is the generation: 8700 is 8th gen, which uses LGA1151." },
+    { q: "Core i5-10400: which socket?", opts: ["LGA1151", "LGA1200", "LGA1700", "AM4"], a: 1,
+      why: "Five digits starting with 10 means 10th gen: LGA1200." },
+    { q: "Core i5-13600K: which socket?", opts: ["LGA1151", "LGA1200", "LGA1700", "LGA1851"], a: 2,
+      why: "13th gen. 12th, 13th and 14th gen all use LGA1700." },
+    { q: "Core i3-7100: which socket?", opts: ["LGA1151", "LGA1200", "LGA1700", "AM5"], a: 0,
+      why: "7th gen: LGA1151." },
+    { q: "Core Ultra 7 265K: which socket?", opts: ["LGA1200", "LGA1700", "AM5", "LGA1851"], a: 3,
+      why: "The Core Ultra 200S desktop series uses LGA1851." },
+    { q: "Ryzen 5 5600X: which socket?", opts: ["AM5", "AM4", "LGA1700", "LGA1151"], a: 1,
+      why: "Ryzen 1000 through 5000 use AM4, with pins on the CPU." },
+    { q: "Ryzen 7 7700X: which socket?", opts: ["AM4", "LGA1851", "AM5", "LGA1200"], a: 2,
+      why: "Ryzen 7000 and newer use AM5, with pins in the socket." },
+    { q: "An i7-8700 (8th gen) and a motherboard built for 6th/7th gen both say LGA1151. Should you install it?",
+      opts: ["Yes. Same socket name always works", "No. It fits, but that board doesn't support 8th/9th gen. Check the board's CPU support list", "Yes, after a Windows update", "Only with fresh thermal paste"], a: 1,
+      why: "8th and 9th gen need 300-series boards. The CPU physically fits an older LGA1151 board but will not work in it." },
+    { q: "LGA1700 and LGA1851 CPUs are the same outer size. Can you swap them between boards?",
+      opts: ["Yes, same size means same socket", "No. The notches and contacts are different", "Yes, with a firm push", "Only K models"], a: 1,
+      why: "Same size is not the same socket. The keys will stop it from sitting flat. Never force it." },
+  ],
+};
+
+// "Find the mark" rounds
+const SPOTS = [
+  { kind: "cpu", cpu: "i7-8700", rot: 0 },
+  { kind: "cpu", cpu: "i5-14600K", rot: 90 },
+  { kind: "socket", sock: "lga1151", rot: 180, mark: "dot" },
+  { kind: "cpu", cpu: "Ryzen 5 5600", rot: 180 },
+  { kind: "cpu", cpu: "i5-10400", rot: 270 },
+  { kind: "socket", sock: "lga1700", rot: 90, mark: "tri" },
+  { kind: "cpu", cpu: "Ultra 5 245K", rot: 180 },
+  { kind: "socket", sock: "am4", rot: 270, mark: "tri" },
+];
+const SPOT_MSG = {
+  dot: "Decoy. Those little dots are factory marks. They do NOT show which way the CPU goes.",
+  code: "Decoy. That square is a tracking code for the factory.",
+  text: "Decoy. The printing tells you the model, never the direction.",
+  body: "Not there. The mark you want is in a corner.",
+  hole: "That's a cooler mounting hole. There is one at every corner, so it can't show direction.",
+  lever: "That's the lever. It isn't an orientation mark.",
+  key: "Those are the socket's keys. They match the CPU's notches, which is a great second check. But find the corner mark.",
+  frame: "That's the socket frame. Look just outside one corner.",
+  field: "Those are the contacts. Never touch them! Look just outside one corner of the socket.",
+};
+
+// ============================================================
+//  SOCKET SAFE — app engine
+// ============================================================
+(function () {
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const mod360 = (d) => ((d % 360) + 360) % 360;
+const HAND_BG = "#1c2129";
+
+// ---------- state ----------
+const LS_KEY = "socketsafe.v1";
+function defaultState() { return { xp: 0, quiz: {}, quizMiss: {}, spot: {}, levels: {}, destroyed: 0, cert: null, certFails: 0, badges: {}, name: "" }; }
+let S = defaultState();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) S = Object.assign(defaultState(), JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) {} }
+
+const XP = { quiz: 10, spot: 15, perfect: 100, ok: 50, cert: 300 };
+const RANKS = [[0, "New Hire"], [200, "Apprentice"], [500, "Bench Tech"], [900, "Senior Tech"], [1300, "Socket Master"]];
+function rankOf(xp) {
+  let i = 0;
+  RANKS.forEach((r, k) => { if (xp >= r[0]) i = k; });
+  const next = RANKS[i + 1];
+  return { i, name: RANKS[i][1], floor: RANKS[i][0], next: next ? next[0] : null };
+}
+const quizDone = (k) => QUIZZES[k].filter((q, i) => S.quiz[k + i]).length;
+const spotDone = () => SPOTS.filter((s, i) => S.spot[i]).length;
+const levelsDone = () => LEVELS.filter((l, i) => S.levels[i]).length;
+const levelsPerfect = () => LEVELS.filter((l, i) => S.levels[i] === "perfect").length;
+const certReady = () => quizDone("rules") === QUIZZES.rules.length && levelsDone() === LEVELS.length;
+
+const BADGES = [
+  { id: "rules", icon: "📜", name: "Rule Keeper", desc: "Finished the rules quiz", test: () => quizDone("rules") === QUIZZES.rules.length },
+  { id: "sockets", icon: "🔎", name: "Socket Scholar", desc: "Finished the sockets quiz", test: () => quizDone("sockets") === QUIZZES.sockets.length },
+  { id: "eye", icon: "👁️", name: "Eagle Eye", desc: "Found every mark", test: () => spotDone() === SPOTS.length },
+  { id: "hands", icon: "🤲", name: "Steady Hands", desc: "Completed all 8 practice installs", test: () => levelsDone() === LEVELS.length },
+  { id: "flawless", icon: "💎", name: "Flawless", desc: "All 8 practice installs perfect", test: () => levelsPerfect() === LEVELS.length },
+  { id: "cert", icon: "🏅", name: "Certified", desc: "Passed the certification run", test: () => !!S.cert },
+];
+function checkBadges() {
+  BADGES.forEach((b) => {
+    if (!S.badges[b.id] && b.test()) { S.badges[b.id] = Date.now(); toast(`${b.icon} Badge: <b>${esc(b.name)}</b>`, "badge"); }
+  });
+  save();
+}
+function addXP(n, why) {
+  const before = rankOf(S.xp).i;
+  S.xp += n;
+  toast(`+${n} XP · ${esc(why)}`, "xp");
+  const after = rankOf(S.xp);
+  if (after.i > before) toast(`⬆️ Promoted to <b>${after.name}</b>`, "badge");
+  checkBadges();
+  renderHeader();
+  renderNav();
+}
+function toast(html, kind) {
+  const box = $("#toasts"), el = document.createElement("div");
+  el.className = "toast " + (kind || "");
+  el.innerHTML = html;
+  while (box.children.length >= 4) box.firstChild.remove();
+  box.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+// ---------- certificate code ----------
+function certCode(name, date) {
+  const s = name.trim().toLowerCase().replace(/\s+/g, " ") + "|" + date + "|socket-safe";
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ("000000" + (h >>> 0).toString(36).toUpperCase()).slice(-6);
+}
+function today() {
+  const d = new Date(), p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// ---------- header & nav ----------
+function renderHeader() {
+  const r = rankOf(S.xp);
+  const pct = r.next ? Math.round(100 * (S.xp - r.floor) / (r.next - r.floor)) : 100;
+  $("#hdr-rank").innerHTML = `<b>${S.cert ? "🏅 " : ""}${r.name}</b><small>${S.xp} XP</small>`;
+  $("#xpfill").style.width = pct + "%";
+}
+function navItem(href, icon, label, extra) {
+  const cur = (location.hash || "#home") === href;
+  return `<a href="${href}" class="nav-item${cur ? " cur" : ""}"><span class="ni-icon">${icon}</span><span class="ni-label">${label}</span>${extra || ""}</a>`;
+}
+function prog(done, total) { return `<span class="ni-prog${done === total ? " done" : ""}">${done === total ? "✓" : done + "/" + total}</span>`; }
+function renderNav() {
+  $("#nav").innerHTML =
+    navItem("#home", "🏠", "Home") +
+    `<div class="nav-sec">Training</div>` +
+    navItem("#rules", "1", "The 8 Rules", prog(quizDone("rules"), QUIZZES.rules.length)) +
+    navItem("#sockets", "2", "Know Your Sockets", prog(quizDone("sockets"), QUIZZES.sockets.length)) +
+    navItem("#spot", "3", "Find the Mark", prog(spotDone(), SPOTS.length)) +
+    navItem("#install", "4", "Install Simulator", prog(levelsDone(), LEVELS.length)) +
+    navItem("#cert", "5", "Certification", S.cert ? `<span class="ni-prog done">✓</span>` : "") +
+    `<div class="nav-sec">Reference</div>` +
+    navItem("#checklist", "📋", "Bench Checklist") +
+    navItem("#teacher", "🍎", "Teacher Guide");
+}
+
+// ---------- shared pieces ----------
+function quizHTML(key) {
+  return QUIZZES[key].map((q, i) => {
+    const id = key + i, done = S.quiz[id];
+    return `<div class="quiz${done ? " done" : ""}">
+      <div class="q-head"><span class="q-num">${i + 1}</span><span>${q.q}</span></div>
+      <div class="opts">${q.opts.map((o, j) => `<button class="opt${done && j === q.a ? " right" : ""}" data-act="answer" data-quiz="${key}" data-q="${i}" data-i="${j}" ${done ? "disabled" : ""}>${esc(o)}</button>`).join("")}</div>
+      <div class="why${done ? " right" : ""}" ${done ? "" : "hidden"}>${done ? `<b>Correct.</b> ${q.why}` : ""}</div>
+    </div>`;
+  }).join("");
+}
+function answerQuiz(b) {
+  const key = b.dataset.quiz, qi = +b.dataset.q, i = +b.dataset.i, id = key + qi;
+  if (S.quiz[id]) return;
+  const q = QUIZZES[key][qi], box = b.closest(".quiz"), why = $(".why", box);
+  if (i === q.a) {
+    b.classList.add("right");
+    $$(".opt", box).forEach((o) => { o.disabled = true; });
+    const first = !S.quizMiss[id];
+    S.quiz[id] = first ? "first" : "later";
+    why.innerHTML = `<b>Correct.</b> ${q.why}`;
+    why.className = "why right"; why.hidden = false;
+    box.classList.add("done");
+    save();
+    if (first) addXP(XP.quiz, "quiz"); else { checkBadges(); renderNav(); }
+  } else {
+    b.classList.add("wrong"); b.disabled = true;
+    S.quizMiss[id] = true; save();
+    why.innerHTML = `<b>Not that one.</b> Think about what could get damaged, then try again.`;
+    why.className = "why wrong"; why.hidden = false;
+  }
+}
+function fig(svg, cap) { return `<figure class="fig"><div class="svgbox">${svg}</div><figcaption>${cap}</figcaption></figure>`; }
+
+// ---------- views ----------
+function viewHome() {
+  const steps = [
+    ["#rules", "1", "The 8 Rules", "What to do, in order, every time.", quizDone("rules"), QUIZZES.rules.length],
+    ["#sockets", "2", "Know Your Sockets", "Which CPU goes in which socket, 6th gen to today.", quizDone("sockets"), QUIZZES.sockets.length],
+    ["#spot", "3", "Find the Mark", "Tap the real orientation mark. Ignore the decoys.", spotDone(), SPOTS.length],
+    ["#install", "4", "Install Simulator", "Install 8 CPUs across 6 sockets.", levelsDone(), LEVELS.length],
+    ["#cert", "5", "Certification", "8 perfect installs in a row. No hints.", S.cert ? 1 : 0, 1],
+  ];
+  return `
+  <section class="hero">
+    <div class="hero-text">
+      <div class="eyebrow">CPU installation training · Intel 6th gen to Core Ultra · AMD AM4 &amp; AM5</div>
+      <h1>Socket <span>Safe</span></h1>
+      <p>A CPU that goes in the wrong way and gets clamped down is bent for good, and the socket's pins are crushed with it. It takes two seconds and cannot be undone.</p>
+      <p>Every one of those accidents is prevented by one habit: <b>match the triangle, lower it flat, and never force anything.</b> This training makes that habit automatic.</p>
+      <div class="hero-cta"><a class="btn primary big" href="${(steps.find((s) => s[4] < s[5]) || steps[4])[0]}">${S.xp ? "Continue training" : "Start training"} →</a>
+      <a class="btn ghost big" href="#checklist">📋 Bench checklist</a></div>
+    </div>
+    <div class="hero-art">${svgWrap(drawCPU(cpuById("i7-8700"), { hl: true }), 0, { bg: "none", label: "CPU with its gold triangle highlighted" })}</div>
+  </section>
+  <h2 class="sec-title">Your path</h2>
+  <div class="path">${steps.map((s) => `
+    <a class="step-card${s[4] === s[5] ? " complete" : ""}" href="${s[0]}">
+      <span class="sc-num">${s[4] === s[5] ? "✓" : s[1]}</span>
+      <div><h3>${s[2]}</h3><p>${s[3]}</p><div class="prog"><div class="prog-bar"><div style="width:${Math.round(100 * s[4] / s[5])}%"></div></div><span>${s[4]}/${s[5]}</span></div></div>
+    </a>`).join("")}</div>
+  <h2 class="sec-title">Badges</h2>
+  <div class="badges">${BADGES.map((b) => `<div class="badge${S.badges[b.id] ? " earned" : ""}"><div class="b-icon">${b.icon}</div><b>${esc(b.name)}</b><small>${esc(b.desc)}</small></div>`).join("")}</div>
+  <h2 class="sec-title">Turn in your progress</h2>
+  <div class="card">
+    <p>Progress is saved in this browser only. Enter your name and copy your report for your teacher.</p>
+    <div class="row"><input id="student-name" type="text" placeholder="Your full name" value="${esc(S.name)}"><button class="btn primary" data-act="copy-report">Copy progress report</button></div>
+    <textarea id="report-box" readonly hidden rows="11"></textarea>
+    <div class="danger-zone"><button class="btn ghost sm" data-act="reset-all">Reset all progress…</button>
+      <span id="reset-confirm" hidden>This erases everything in this browser, including certification. <button class="btn danger sm" data-act="reset-yes">Yes, reset</button><button class="btn ghost sm" data-act="reset-no">Cancel</button></span></div>
+  </div>`;
+}
+
+function viewRules() {
+  const cpu = cpuById("i7-8700");
+  return `
+  <section class="page-head"><div class="eyebrow">Module 1</div><h2>The 8 Rules</h2>
+  <p>These are the same for every socket in the lab. Learn them in order. The first four are about <b>looking</b>; the last four are about <b>your hands</b>.</p></section>
+  <div class="figs">
+    ${fig(svgWrap(drawCPU(cpu, { hl: true }), 0, { bg: HAND_BG, label: "CPU" }), "<b>The CPU.</b> One gold triangle in one corner (circled). The dots, the text and the square code are decoys.")}
+    ${fig(svgWrap(drawSocket("lga1151", { open: true, mark: "tri", hl: true }), 0, { label: "Open socket" }), "<b>The socket.</b> A small triangle or dot at one corner (circled). The two grey bumps on the sides are keys for the CPU's notches.")}
+    ${fig(svgWrap(drawSocket("lga1151", { open: true, mark: "tri", cpu: cpu, rel: 0 }), 0, { label: "CPU seated correctly" }), "<b>Right.</b> Triangle at the marked corner. Notches around the keys. Flat.")}
+    ${fig(svgWrap(drawSocket("lga1151", { open: true, mark: "tri", cpu: cpu, rel: 180, bad: true }), 0, { label: "CPU seated backwards" }), "<b>Wrong.</b> Backwards. The CPU is resting on top of the keys (red), tilted. Closing the lever now bends it.")}
+  </div>
+  <ol class="rules">${RULES.map((r) => `<li><b>${r[0]}</b><span>${r[1]}</span></li>`).join("")}</ol>
+  <div class="callout warn"><div class="callout-label">How a CPU actually gets bent</div>
+  The CPU is set in turned the wrong way. Its notches miss the socket's keys, so it sits on top of them, slightly tilted. It looks “close enough.” Then the load plate comes down. That plate is built to clamp with a lot of force, and all of it lands on a chip that isn't supported. The CPU bends and the socket pins underneath are flattened. The lever did exactly what it was told. The mistake happened one step earlier, when nobody looked.</div>
+  <div class="callout tip"><div class="callout-label">About lever force</div>
+  Intel and AM5 levers are stiff <i>even when everything is right</i>. So “it felt hard to close” and “it felt fine” tell you nothing. The only real check is your eyes, before the lever: <b>triangle, notches, flat.</b> If anything scrapes or crunches, or the plate won't come down level, stop.</div>
+  <h2 class="sec-title">Rules quiz</h2><p class="muted">10 XP for each one you get right on the first try. You need all of these done to unlock certification.</p>
+  ${quizHTML("rules")}
+  <div class="pager"><a class="btn ghost" href="#home">← Home</a><a class="btn primary" href="#sockets">2. Know Your Sockets →</a></div>`;
+}
+
+function viewSockets() {
+  const order = ["lga1151", "lga1200", "lga1700", "lga1851", "am4", "am5"];
+  const sample = { lga1151: "i7-8700", lga1200: "i5-10400", lga1700: "i7-12700", lga1851: "Ultra 5 245K", am4: "Ryzen 5 5600", am5: "Ryzen 5 7600" };
+  return `
+  <section class="page-head"><div class="eyebrow">Module 2</div><h2>Know Your Sockets</h2>
+  <p>Before you pick up a CPU, know which socket it belongs in. A CPU in the wrong socket will never sit flat, no matter how you turn it.</p></section>
+  <div class="tbl-wrap"><table><thead><tr><th>Socket</th><th>CPUs</th><th>Fragile pins are…</th><th>CPU shape</th></tr></thead><tbody>
+  ${order.map((k) => { const s = SOCKETS[k]; return `<tr><td><b>${s.name}</b></td><td>${s.cpus}</td><td>${s.pins}</td><td>${s.shape}</td></tr>`; }).join("")}
+  </tbody></table></div>
+  <div class="callout tip"><div class="callout-label">Reading an Intel model number</div>
+  The generation is at the front of the number. <code>i5-<b>6</b>500</code> is 6th gen. <code>i7-<b>8</b>700</code> is 8th gen. <code>i5-<b>10</b>400</code> is 10th gen. <code>i5-<b>14</b>600K</code> is 14th gen. Newer chips are named <code>Core Ultra 5 245K</code>: the 200 series uses LGA1851.</div>
+  <div class="callout warn"><div class="callout-label">Same size is not the same socket</div>
+  LGA1151 and LGA1200 CPUs are the same size. So are LGA1700 and LGA1851. The notches are in different places so the wrong one can't sit flat. Also, 8th and 9th gen CPUs fit older 6th/7th gen LGA1151 boards but don't work in them. Always check the board's CPU support list.</div>
+  <h2 class="sec-title">Socket gallery</h2><p class="muted">Each pair shows the CPU and its open socket, both turned the same way. Simplified drawings: real notch positions differ slightly.</p>
+  <div class="gallery">${order.map((k) => `<div class="gal"><h4>${SOCKETS[k].name}</h4><div class="gal-pair">
+    <div class="svgbox">${svgWrap(drawCPU(cpuById(sample[k]), {}), 0, { bg: HAND_BG, label: SOCKETS[k].name + " CPU" })}</div>
+    <div class="svgbox">${svgWrap(drawSocket(k, { open: true, mark: "tri" }), 0, { label: SOCKETS[k].name + " socket" })}</div></div>
+    <p>${SOCKETS[k].cpus}. Pins: <b>${SOCKETS[k].pins.toLowerCase()}</b>.</p></div>`).join("")}</div>
+  <div class="callout tip"><div class="callout-label">AMD notes</div>
+  <b>AM4</b>: pins are on the CPU. Lift the lever all the way up, match the triangle, let the CPU drop in, then lower the lever. When removing an AM4 cooler, twist it gently first, because the paste can pull the CPU out of the socket with it. <b>AM5</b>: works like Intel, with pins in the socket and a load plate.</div>
+  <h2 class="sec-title">Sockets quiz</h2>
+  ${quizHTML("sockets")}
+  <div class="pager"><a class="btn ghost" href="#rules">← 1. The 8 Rules</a><a class="btn primary" href="#spot">3. Find the Mark →</a></div>`;
+}
+
+// ---------- Find the Mark ----------
+let SPOT_I = Math.max(0, SPOTS.findIndex((s, i) => !S.spot[i]));
+function viewSpot() {
+  if (SPOT_I >= SPOTS.length) SPOT_I = 0;
+  const r = SPOTS[SPOT_I], isCpu = r.kind === "cpu";
+  const svg = isCpu ? svgWrap(drawCPU(cpuById(r.cpu), {}), r.rot, { bg: HAND_BG, label: "CPU" })
+                    : svgWrap(drawSocket(r.sock, { open: true, mark: r.mark }), r.rot, { label: "Socket" });
+  return `
+  <section class="page-head"><div class="eyebrow">Module 3</div><h2>Find the Mark</h2>
+  <p>Tap the <b>one</b> mark that shows orientation. On a CPU that's the gold triangle. On a board it's the small triangle or dot at one corner of the socket. Everything else is a decoy.</p></section>
+  <div class="dots">${SPOTS.map((s, i) => `<button class="dot${i === SPOT_I ? " cur" : ""}${S.spot[i] ? " done" : ""}" data-act="spot-go" data-i="${i}" aria-label="Round ${i + 1}">${S.spot[i] ? "✓" : i + 1}</button>`).join("")}</div>
+  <div class="card spot">
+    <div class="spot-q">Round ${SPOT_I + 1} of ${SPOTS.length}: ${isCpu ? `tap the orientation mark on this <b>${esc(r.cpu)}</b>` : `tap the orientation mark for this <b>${SOCKETS[r.sock].name}</b> socket`}</div>
+    <div class="spot-stage svgbox" data-spot="${SPOT_I}">${svg}</div>
+    <div class="spot-fb" id="spot-fb" hidden></div>
+  </div>
+  <div class="pager"><a class="btn ghost" href="#sockets">← 2. Know Your Sockets</a><a class="btn primary" href="#install">4. Install Simulator →</a></div>`;
+}
+let SPOT_MISS = false;
+function spotClick(target) {
+  const stage = target.closest(".spot-stage");
+  if (!stage || stage.dataset.done) return;
+  const hitEl = target.closest("[data-hit]");
+  const hit = hitEl ? hitEl.dataset.hit : "body";
+  const i = +stage.dataset.spot, r = SPOTS[i], fb = $("#spot-fb");
+  const right = r.kind === "cpu" ? hit === "tri" : hit === "mark";
+  fb.hidden = false;
+  if (right) {
+    stage.dataset.done = "1";
+    const last = SPOTS.every((s, k) => k === i || S.spot[k]);
+    fb.className = "spot-fb right";
+    fb.innerHTML = `<b>That's it.</b> ${r.kind === "cpu" ? "The gold triangle is the only mark on a CPU that shows direction." : "That's the board's mark. The CPU's gold triangle goes at this corner."} ` +
+      (last ? `<a class="btn primary sm" href="#install">On to the simulator →</a>` : `<button class="btn primary sm" data-act="spot-next">Next round →</button>`);
+    if (!S.spot[i]) {
+      S.spot[i] = true; save();
+      if (!SPOT_MISS) addXP(XP.spot, "found the mark"); else { checkBadges(); renderNav(); }
+    }
+    SPOT_MISS = false;
+  } else {
+    SPOT_MISS = true;
+    fb.className = "spot-fb wrong";
+    let msg = SPOT_MSG[hit] || SPOT_MSG.body;
+    if (r.kind === "cpu" && hit === "body") msg = "Not there. The mark you want is in a corner, and it's gold.";
+    if (r.kind === "socket" && hit === "mark") msg = SPOT_MSG.body;
+    fb.innerHTML = `<b>No.</b> ${msg}`;
+  }
+}
+
+// ---------- Install simulator ----------
+let PLAY = null;
+function makeLevel(idx, cert) {
+  const base = LEVELS[idx];
+  if (!cert) return Object.assign({ idx }, base);
+  const boardRot = 90 * Math.floor(Math.random() * 4);
+  const startRot = mod360(boardRot + 90 * (1 + Math.floor(Math.random() * 3)));
+  return { idx, cpu: base.cpu, boardRot, startRot, mark: Math.random() < 0.5 ? "tri" : "dot", hl: false, fact: base.fact };
+}
+function startLevel(idx) {
+  PLAY = { mode: "practice", level: makeLevel(idx, false) };
+  resetPlay();
+  renderPlay();
+}
+function startCert() {
+  const order = LEVELS.map((l, i) => i);
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  PLAY = { mode: "cert", order, pos: 0, level: makeLevel(order[0], true) };
+  resetPlay();
+  renderPlay();
+}
+function resetPlay() { PLAY.phase = "closed"; PLAY.cpuRot = PLAY.level.startRot; PLAY.mistakes = 0; }
+
+function viewInstall() {
+  if (PLAY && PLAY.mode === "practice") return playHTML();
+  return `
+  <section class="page-head"><div class="eyebrow">Module 4</div><h2>Install Simulator</h2>
+  <p>Eight CPUs, six sockets. Each one is the full job: open the socket, turn the CPU so its triangle matches the board's mark, lower it, lock it. A perfect install is worth 100 XP.</p></section>
+  <div class="lvl-grid">${LEVELS.map((l, i) => { const c = cpuById(l.cpu), s = SOCKETS[c.sock], st = S.levels[i]; return `
+    <button class="lvl${st ? " done" : ""}" data-act="level" data-i="${i}">
+      <span class="lvl-num">Level ${i + 1}</span><b>${esc(c.id)}</b><small>${c.gen} · ${s.name}</small>
+      <span class="lvl-st">${st === "perfect" ? "★ Perfect" : st === "ok" ? "✓ Done (retry for ★)" : "Start →"}</span>
+    </button>`; }).join("")}</div>
+  <div class="pager"><a class="btn ghost" href="#spot">← 3. Find the Mark</a><a class="btn primary" href="#cert">5. Certification →</a></div>`;
+}
+
+function boardSVG() {
+  const L = PLAY.level, c = cpuById(L.cpu), ph = PLAY.phase;
+  const placed = ph === "bad" || ph === "seated" || ph === "locked" || ph === "destroyed";
+  const hl = L.hl && PLAY.mode === "practice" && (ph === "align" || ph === "closed");
+  return svgWrap(drawSocket(c.sock, {
+    open: ph !== "closed", mark: L.mark, hl: hl && ph === "align", locked: ph === "locked" || ph === "destroyed",
+    cpu: placed ? c : null, rel: mod360(PLAY.cpuRot - L.boardRot), bad: ph === "bad" || ph === "destroyed",
+  }), L.boardRot, { label: "Motherboard socket" });
+}
+function handSVG() {
+  const L = PLAY.level, c = cpuById(L.cpu);
+  const hl = L.hl && PLAY.mode === "practice" && PLAY.phase === "align";
+  return svgWrap(drawCPU(c, { hl }), PLAY.cpuRot, { bg: HAND_BG, label: "CPU in your hand", cls: "hand-svg" });
+}
+function playHTML() {
+  const L = PLAY.level, c = cpuById(L.cpu), s = SOCKETS[c.sock], ph = PLAY.phase, pga = s.type === "pga";
+  const cert = PLAY.mode === "cert";
+  const stepIdx = { closed: 0, align: 1, bad: 1, seated: 2, locked: 3, destroyed: 3 }[ph];
+  const chips = ["Open", "Align & lower", "Lock"].map((t, i) => `<span class="chip${i < stepIdx ? " done" : i === stepIdx ? " cur" : ""}">${i + 1}. ${t}</span>`).join("");
+  const inHand = ph === "closed" || ph === "align";
+  let coach = "", actions = "", cls = "";
+  if (ph === "closed") {
+    coach = pga ? "<b>Step 1: open the socket.</b> Lift the lever all the way up. Keep the CPU in your hand, held by its edges."
+                : "<b>Step 1: open the socket.</b> Release the lever and lift the load plate. Don't touch the contacts underneath.";
+    actions = `<button class="btn primary big" data-act="open">${pga ? "Lift the lever" : "Release lever & lift plate"}</button>`;
+  } else if (ph === "align") {
+    coach = cert ? "<b>Step 2: align and lower.</b>"
+      : "<b>Step 2: align.</b> Turn the CPU until its <b>gold triangle</b> is at the same corner as the board's <b>white mark</b>. Ignore the text and the little dots. Then lower it.";
+    actions = `<button class="btn big" data-act="rot" data-d="-90" aria-label="Turn left">↺ Turn</button><button class="btn big" data-act="rot" data-d="90" aria-label="Turn right">Turn ↻</button><button class="btn primary big" data-act="lower">⬇ Lower CPU</button>`;
+  } else if (ph === "bad") {
+    cls = "danger";
+    coach = (pga ? "<b>⚠️ It is NOT sitting flat.</b> The pins are not dropping into the holes."
+                 : "<b>⚠️ It is NOT sitting flat.</b> The CPU is resting on the socket's keys (red) and is tilted.") + " What do you do?";
+    actions = `<button class="btn big" data-act="force">${pga ? "Press it in and lower the lever" : "Close the plate and push the lever down"}</button><button class="btn big" data-act="lift">Lift it straight out and re-check</button>`;
+  } else if (ph === "seated") {
+    cls = "good";
+    coach = (pga ? "<b>It dropped in flat.</b> Triangle matches. <b>Step 3:</b> lower the lever to lock it."
+                 : "<b>It dropped in flat.</b> Triangle matches and the notches are around the keys. <b>Step 3:</b> close the plate and lock the lever. The plastic cover pops off by itself.");
+    actions = `<button class="btn primary big" data-act="lock">${pga ? "Lower the lever" : "Close plate & lock lever"}</button>`;
+  } else if (ph === "locked") {
+    cls = "good";
+    const perfect = PLAY.mistakes === 0;
+    if (cert) {
+      coach = `<b>Locked in. ${PLAY.pos + 1} of ${LEVELS.length} done.</b>`;
+      actions = `<button class="btn primary big" data-act="cert-next">Next CPU →</button>`;
+    } else {
+      coach = `<b>${perfect ? "★ Perfect install." : "✓ Installed."}</b> ${perfect ? "" : "You caught your mistake and lifted it out, which is exactly right. Replay for a perfect score. "}<span class="fact">${L.fact}</span>`;
+      const next = L.idx + 1 < LEVELS.length;
+      actions = (perfect ? "" : `<button class="btn big" data-act="level" data-i="${L.idx}">↺ Replay</button>`) +
+        (next ? `<button class="btn primary big" data-act="level" data-i="${L.idx + 1}">Next level →</button>` : `<a class="btn primary big" href="#cert" data-act="exit-play">Go to certification →</a>`);
+    }
+  } else if (ph === "destroyed") {
+    cls = "danger";
+    coach = `<b>💥 CRUNCH.</b> ` + (pga ? "The CPU's pins are bent and some snapped off in the socket." : "The load plate bent the CPU and crushed the socket pins under it.") +
+      " In the lab, that's a dead motherboard and probably a dead CPU. The CPU told you it was wrong when it didn't sit flat. <b>Never force it.</b>";
+    actions = cert ? `<button class="btn primary big" data-act="cert-start">Start certification over</button>`
+                   : `<button class="btn primary big" data-act="level" data-i="${L.idx}">Try this level again</button>`;
+  }
+  const title = cert ? `Certification · CPU ${PLAY.pos + 1} of ${LEVELS.length}` : `Level ${L.idx + 1} of ${LEVELS.length}`;
+  return `
+  <div class="play">
+    <div class="play-head"><div><div class="eyebrow">${title}</div><h2>${esc(c.id)} <small>${c.gen} · ${s.name}</small></h2></div>
+      <button class="btn ghost sm" data-act="exit-play">✕ ${cert ? "Quit run" : "All levels"}</button></div>
+    <div class="chips">${chips}</div>
+    <div class="coach ${cls}" id="coach" aria-live="polite">${coach}</div>
+    <div class="bench">
+      <figure class="panel"><figcaption>In your hand</figcaption>
+        <div class="svgbox${inHand ? " tappable" : ""}" id="hand" ${ph === "align" ? 'data-act="rot" data-d="90"' : ""}>${inHand ? handSVG() : `<div class="empty-hand">The CPU is in the socket.</div>`}</div></figure>
+      <figure class="panel"><figcaption>On the motherboard · ${s.name}${pga ? " (holes)" : ""}</figcaption>
+        <div class="svgbox" id="board">${boardSVG()}</div></figure>
+    </div>
+    <div class="actions">${actions}</div>
+  </div>`;
+}
+function renderPlay() {
+  $("#main").innerHTML = playHTML();
+  window.scrollTo(0, 0);
+}
+function failCert(reason) {
+  S.certFails++; save();
+  PLAY.failed = reason;
+}
+function playAct(act, b) {
+  if (!PLAY) return false;
+  const L = PLAY.level, cert = PLAY.mode === "cert";
+  if (act === "open" && PLAY.phase === "closed") { PLAY.phase = "align"; renderPlay(); }
+  else if (act === "rot" && PLAY.phase === "align") {
+    PLAY.cpuRot += +b.dataset.d;
+    const g = $("#hand .rot");
+    if (g) { g.style.transform = `rotate(${PLAY.cpuRot}deg)`; g.setAttribute("transform", `rotate(${PLAY.cpuRot})`); }
+  }
+  else if (act === "lower" && PLAY.phase === "align") {
+    if (mod360(PLAY.cpuRot) === L.boardRot) PLAY.phase = "seated";
+    else { PLAY.phase = "bad"; PLAY.mistakes++; if (cert) failCert("wrong"); }
+    renderPlay();
+  }
+  else if (act === "lift" && PLAY.phase === "bad") {
+    if (cert) {
+      $("#coach").innerHTML = `<b>Good instinct, but this run is over.</b> You did the right thing by lifting it out. Certification needs ${LEVELS.length} installs that are right the first time. Check the triangle <i>before</i> you lower.`;
+      $(".actions").innerHTML = `<button class="btn primary big" data-act="cert-start">Start certification over</button>`;
+    } else { PLAY.phase = "align"; renderPlay(); toast("Good call. Re-check the triangle.", ""); }
+  }
+  else if (act === "force" && PLAY.phase === "bad") {
+    PLAY.phase = "destroyed"; S.destroyed++; save(); renderPlay();
+  }
+  else if (act === "lock" && PLAY.phase === "seated") {
+    PLAY.phase = "locked";
+    if (!cert) {
+      const perfect = PLAY.mistakes === 0, prev = S.levels[L.idx];
+      if (!prev) { S.levels[L.idx] = perfect ? "perfect" : "ok"; save(); addXP(perfect ? XP.perfect : XP.ok, perfect ? "perfect install" : "install complete"); }
+      else if (prev === "ok" && perfect) { S.levels[L.idx] = "perfect"; save(); addXP(XP.perfect - XP.ok, "upgraded to perfect"); }
+    } else if (PLAY.pos + 1 >= LEVELS.length) { passCert(); return true; }
+    renderPlay();
+  }
+  else if (act === "cert-next" && cert && PLAY.phase === "locked") {
+    PLAY.pos++; PLAY.level = makeLevel(PLAY.order[PLAY.pos], true); resetPlay(); renderPlay();
+  }
+  else return false;
+  return true;
+}
+function passCert() {
+  const first = !S.cert;
+  const date = today();
+  S.cert = { name: S.name, date, code: certCode(S.name, date) };
+  save();
+  PLAY = null;
+  if (first) addXP(XP.cert, "certified"); else checkBadges();
+  route();
+}
+
+function viewCert() {
+  if (PLAY && PLAY.mode === "cert") return playHTML();
+  const ready = certReady();
+  let body = "";
+  if (S.cert) {
+    body += `<div class="certificate"><div class="cert-seal">🏅</div><div class="eyebrow">Certificate of completion</div>
+      <h3>${esc(S.cert.name)}</h3><p>is <b>Socket Safe certified</b>: ${LEVELS.length} of ${LEVELS.length} processors installed correctly on the first try, across LGA1151, LGA1200, LGA1700, LGA1851, AM4 and AM5.</p>
+      <div class="cert-meta"><span>Date: <b>${S.cert.date}</b></span><span>Code: <b>${S.cert.code}</b></span></div></div>
+      <p class="muted">Show this screen to your teacher, or copy your progress report from the Home page. You can run certification again any time.</p>`;
+  }
+  if (!ready) {
+    body += `<div class="card"><h3>🔒 Not unlocked yet</h3><p>To take the certification run you need:</p><ul class="need">
+      <li class="${quizDone("rules") === QUIZZES.rules.length ? "ok" : ""}">Rules quiz finished (${quizDone("rules")}/${QUIZZES.rules.length})</li>
+      <li class="${levelsDone() === LEVELS.length ? "ok" : ""}">All practice installs finished (${levelsDone()}/${LEVELS.length})</li></ul></div>`;
+  } else {
+    body += `<div class="card"><h3>The certification run</h3>
+      <ul class="need plain"><li>All ${LEVELS.length} CPUs, in random order, with the sockets turned random ways.</li><li>No highlights and no hints.</li><li>One wrong placement ends the run, because in the lab that is where the damage starts.</li></ul>
+      <div class="row"><input id="cert-name" type="text" placeholder="Your full name (goes on the certificate)" value="${esc(S.name)}"><button class="btn primary" data-act="cert-start">${S.cert ? "Run it again" : "Begin certification"}</button></div>
+      <div class="muted" id="cert-msg"></div></div>`;
+  }
+  return `<section class="page-head"><div class="eyebrow">Module 5</div><h2>Certification</h2>
+    <p>Prove the habit: ${LEVELS.length} installs in a row, each one right the first time.</p></section>${body}
+    <div class="pager"><a class="btn ghost" href="#install">← 4. Install Simulator</a><a class="btn ghost" href="#checklist">📋 Bench checklist</a></div>`;
+}
+
+function viewChecklist() {
+  return `
+  <section class="page-head"><div class="eyebrow">Reference</div><h2>📋 Bench Checklist</h2><p>Print this page or keep it open at the bench. Say each line out loud the first few times.</p></section>
+  <div class="card checklist">
+    <h3>Before you pick up the CPU</h3>
+    <ul><li>Power off and unplugged. Touch the metal case to discharge static.</li><li>I know which socket this board has, and this CPU belongs in it.</li><li>Socket is open. I have not touched the contacts.</li></ul>
+    <h3>LOOK</h3>
+    <ul><li>I found the <b>gold triangle</b> on the CPU.</li><li>I found the <b>mark</b> at the socket's corner.</li><li>I am ignoring the text, dots and codes on the CPU.</li></ul>
+    <h3>LOWER</h3>
+    <ul><li>Holding by the edges, triangle to mark, straight down.</li><li>It dropped in <b>flat</b> with <b>no force</b>.</li><li>Notches are around the keys (Intel, AM5).</li></ul>
+    <h3>LOCK</h3>
+    <ul><li>Triangle ✔ Notches ✔ Flat ✔ : now, and only now, the lever.</li><li>If I'm unsure, I ask <b>before</b> the lever.</li></ul>
+    <div class="stopbox">If it does not sit flat: <b>STOP. Lift it out. Start over.</b><br>Never press. Never slide. Never let the lever “seat” it.</div>
+  </div>`;
+}
+
+function viewTeacher() {
+  return `
+  <section class="page-head"><div class="eyebrow">For teachers</div><h2>🍎 Teacher Guide</h2><p>Socket Safe is a self-paced retraining on CPU installation for Intel LGA1151 through LGA1851 and AMD AM4/AM5. It drills one habit: match the triangle, lower flat, never force.</p></section>
+  <div class="card prose">
+    <h3>Running it as a class retraining (about 30 to 45 minutes)</h3>
+    <ol>
+      <li><b>5 min, together:</b> show the damaged part if you can. Read “How a CPU actually gets bent” in Module 1 aloud.</li>
+      <li><b>25 to 35 min, individually:</b> Modules 1 to 4, then the certification run.</li>
+      <li><b>Sign-off:</b> each student shows you the certificate screen, or pastes their progress report into your LMS.</li>
+      <li><b>Suggested policy:</b> nobody handles a CPU until certified, and the first real install after certification is done with you watching the “look before you lock” step.</li>
+    </ol>
+    <h3>What the simulator checks</h3>
+    <ul>
+      <li>Each level makes the student open the socket, rotate the CPU to match the board's corner mark, lower it, and lock it.</li>
+      <li>CPUs carry decoy dots, text and a tracking code. Sockets are mounted in different directions, so CPU text often ends up sideways or upside-down. Students learn that only the gold triangle matters.</li>
+      <li>If the CPU is lowered the wrong way, it sits crooked and the student must choose: force the lever, or lift it out. Forcing it “destroys” the socket and is counted in their report.</li>
+      <li><b>Certification</b> is all 8 CPUs in random order, random socket directions, no hints. One wrong placement ends the run.</li>
+    </ul>
+    <h3>Checking a certificate</h3>
+    <p>Each certificate has a code made from the student's name and the date. Enter them exactly as shown on the certificate:</p>
+    <div class="row"><input id="v-name" type="text" placeholder="Name on certificate"><input id="v-date" type="text" placeholder="Date (YYYY-MM-DD)"><input id="v-code" type="text" placeholder="Code"><button class="btn primary" data-act="verify">Check</button></div>
+    <div id="v-out" class="muted"></div>
+    <p class="muted">This is a light check, not real security. A determined student could read the page's source. Watching one real install is the best verification.</p>
+    <h3>Accuracy notes</h3>
+    <ul>
+      <li>The drawings are simplified. Real notch positions, key shapes and the exact place of the socket's corner mark vary by socket and by motherboard. Some boards print a triangle, some a dot, and some mold it into the socket frame.</li>
+      <li>On most Intel and AM5 boards the plastic socket cover is left on and pops off when the load plate closes. Follow the label on the cover and the board manual.</li>
+      <li>8th/9th gen CPUs physically fit 6th/7th gen LGA1151 boards but are not supported by them.</li>
+      <li>The board manual always wins over this training.</li>
+    </ul>
+    <h3>Hosting and progress</h3>
+    <ul>
+      <li>The whole course is one HTML file with no outside dependencies except optional web fonts, so it also works offline.</li>
+      <li>Progress is saved in each student's browser. It doesn't sync between devices, and clearing browser data erases it.</li>
+    </ul>
+  </div>`;
+}
+
+// ---------- report ----------
+function reportText() {
+  const el = $("#student-name");
+  if (el) { S.name = el.value.trim(); save(); }
+  const lines = [
+    `SOCKET SAFE progress report: ${S.name || "(no name)"}`,
+    `Date: ${today()}`,
+    `Rank: ${rankOf(S.xp).name} (${S.xp} XP)`, "",
+    `1. Rules quiz: ${quizDone("rules")}/${QUIZZES.rules.length}`,
+    `2. Sockets quiz: ${quizDone("sockets")}/${QUIZZES.sockets.length}`,
+    `3. Find the Mark: ${spotDone()}/${SPOTS.length}`,
+    `4. Practice installs: ${levelsDone()}/${LEVELS.length} (${levelsPerfect()} perfect)`,
+    `   Sockets destroyed by forcing: ${S.destroyed}`,
+    `5. Certification: ${S.cert ? `PASSED ${S.cert.date} as "${S.cert.name}", code ${S.cert.code}` : "not yet"} (failed runs: ${S.certFails})`,
+  ];
+  return lines.join("\n");
+}
+
+// ---------- events ----------
+document.addEventListener("click", (e) => {
+  if (e.target.closest(".spot-stage")) { spotClick(e.target); return; }
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const act = b.dataset.act;
+  if (act === "menu") document.body.classList.toggle("nav-open");
+  else if (act === "answer") answerQuiz(b);
+  else if (act === "spot-go") { SPOT_I = +b.dataset.i; SPOT_MISS = false; route(true); }
+  else if (act === "spot-next") { const n = SPOTS.findIndex((s, i) => !S.spot[i]); SPOT_I = n >= 0 ? n : (SPOT_I + 1) % SPOTS.length; SPOT_MISS = false; route(true); }
+  else if (act === "level") startLevel(+b.dataset.i);
+  else if (act === "exit-play") { PLAY = null; if (b.tagName !== "A") route(); }
+  else if (act === "cert-start") {
+    const n = $("#cert-name");
+    if (n) { S.name = n.value.trim(); save(); }
+    if (!S.name) { const m = $("#cert-msg"); if (m) m.textContent = "Enter your name first. It goes on the certificate."; else { PLAY = null; route(); } return; }
+    startCert();
+  }
+  else if (act === "copy-report") {
+    const txt = reportText(), box = $("#report-box");
+    box.value = txt; box.hidden = false;
+    try { navigator.clipboard.writeText(txt).then(() => toast("Report copied.", ""), () => { box.select(); toast("Select the text and copy it.", ""); }); }
+    catch (err) { box.select(); toast("Select the text and copy it.", ""); }
+  }
+  else if (act === "reset-all") $("#reset-confirm").hidden = false;
+  else if (act === "reset-no") $("#reset-confirm").hidden = true;
+  else if (act === "reset-yes") { S = defaultState(); try { localStorage.removeItem(LS_KEY); } catch (err) {} PLAY = null; renderHeader(); route(); toast("Progress reset.", ""); }
+  else if (act === "verify") {
+    const n = $("#v-name").value, d = $("#v-date").value.trim(), c = $("#v-code").value.trim().toUpperCase(), out = $("#v-out");
+    if (!n.trim() || !d || !c) out.textContent = "Fill in all three boxes.";
+    else out.innerHTML = certCode(n, d) === c ? "✅ <b>Valid.</b> The code matches that name and date." : "❌ <b>No match.</b> Check the spelling of the name and the date format.";
+  }
+  else playAct(act, b);
+});
+
+// ---------- router ----------
+function route(keepScroll) {
+  const h = (location.hash || "#home").slice(1);
+  if (PLAY && !((PLAY.mode === "practice" && h === "install") || (PLAY.mode === "cert" && h === "cert"))) PLAY = null;
+  const views = { rules: viewRules, sockets: viewSockets, spot: viewSpot, install: viewInstall, cert: viewCert, checklist: viewChecklist, teacher: viewTeacher };
+  const y = window.scrollY;
+  $("#main").innerHTML = (views[h] || viewHome)();
+  renderNav();
+  document.body.classList.remove("nav-open");
+  window.scrollTo(0, keepScroll === true ? y : 0);
+}
+window.addEventListener("hashchange", () => route());
+renderHeader();
+route();
+checkBadges();
+})();
+
+</script>
+</body>
+</html>
